@@ -43,10 +43,10 @@ def runit(data):
 
 d = [0]
 done = False
-for noun in range(0, 100):
+for noun in range(100):
     if done:
         break
-    for verb in range(0, 100):
+    for verb in range(100):
         d = restoredata(copy(data), noun, verb)
         d = runit(d)
         if d[0] == goal:
