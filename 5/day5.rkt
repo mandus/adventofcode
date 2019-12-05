@@ -34,7 +34,7 @@
 (define (update-ic pos ic input)
   (let* ([op (vector-ref ic pos)]
          [opcode (get-opcode op)]
-         [movepos (hash-ref (hash 
+         [movepos (+ pos (hash-ref (hash 
                               1 4 
                               2 4 
                               3 2 
@@ -43,7 +43,7 @@
                               6 3
                               7 4
                               8 4
-                              99 0) opcode)] 
+                              99 0) opcode))] 
          [readsavepos (hash-ref (hash 
                                   1 3 
                                   2 3 
@@ -60,14 +60,14 @@
       [(1) (vector-set! ic savepos (+ (read-left ic pos op) (read-right ic pos op)))]
       [(2) (vector-set! ic savepos (* (read-left ic pos op) (read-right ic pos op)))]
       [(3) (vector-set! ic savepos input)]
-      [(4) (displayln (format "output from (~a, ~a): ~a" 
+      [(4) (displayln (format "Output from (~a, ~a): ~a" 
                    op 
                    (+ 1 pos)
                    (read-left ic pos op)))]
       [(5) (when (not (equal? 0 (read-left ic pos op)))
-             (set! movepos (- (read-right ic pos op) pos)))]
+             (set! movepos (read-right ic pos op)))]
       [(6) (when (equal? 0 (read-left ic pos op))
-             (set! movepos (- (read-right ic pos op) pos)))]
+             (set! movepos (read-right ic pos op)))]
       [(7) (if (< (read-left ic pos op) (read-right ic pos op))
              (vector-set! ic savepos 1)
              (vector-set! ic savepos 0))]
@@ -77,7 +77,7 @@
       )
     (values 
       opcode
-      (+ pos movepos))))
+      movepos)))
 
 
 (define (set-noun-verb ic noun verb)
@@ -90,17 +90,27 @@
   (for/list ([i l])
     (string->number i)))
 
-(define (parts)
+(define (part1)
   (let* ([data (str->numb (string-split (string-trim (file->string "input.txt")) ","))]
-         ;[input 1] ; The Ship's air conditioner id...
+         [input 1] ; The Ship's air conditioner id...
+         [vd (set-noun-verb (list->vector data) 0 0)]) ; NOTE noun/verb disabled
+    (define (loop-till-ninenine pos)
+      (let-values ([(op nextpos) (update-ic pos vd input)])
+        (if (equal? op 99)
+          (format "Done - part1!")
+          (loop-till-ninenine nextpos))))
+    (loop-till-ninenine 0)))
+
+(define (part2)
+  (let* ([data (str->numb (string-split (string-trim (file->string "input.txt")) ","))]
          [input 5] ; The Ship's thermal radiator controller...
          [vd (set-noun-verb (list->vector data) 0 0)]) ; NOTE noun/verb disabled
     (define (loop-till-ninenine pos)
       (let-values ([(op nextpos) (update-ic pos vd input)])
         (if (equal? op 99)
-          ;(displayln (vector-ref vd 0))
-          (format "Done!")
+          (format "Done - part2!")
           (loop-till-ninenine nextpos))))
     (loop-till-ninenine 0)))
 
-(parts)
+(part1)
+(part2)
