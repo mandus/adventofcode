@@ -13,7 +13,7 @@ h = 6
 #
 # w = 2
 # h = 2
-la = w * h
+layer_size = w * h
 
 
 def layer(d, i, l):
@@ -25,8 +25,21 @@ def layer(d, i, l):
     return d[l*i:l*(i+1)]
 
 
+def num_layers(d, l):
+    """
+    d: data
+    l: size of layer
+    """
+    return int(len(d)/l)
+
+
 def count_chars(d, l, char):
-    n_l = int(len(d)/l)
+    """
+    d: data
+    l: size of layer
+    char: character to search for
+    """
+    n_l = num_layers(d, l)
     chars_in_layer = {}
     for i in range(n_l):
         chars = [c for c in layer(d, i, l) if c == char]
@@ -35,9 +48,9 @@ def count_chars(d, l, char):
 
 
 # min_zeros = sorted(chars_in_layer.items(), key=operator.itemgetter(1))[0]
-min_zeros_layer = sorted(count_chars(data, la, "0").items(), key=operator.itemgetter(1))[0][0]
-ones = count_chars(data, la, "1")
-twos = count_chars(data, la, "2")
+min_zeros_layer = sorted(count_chars(data, layer_size, "0").items(), key=operator.itemgetter(1))[0][0]
+ones = count_chars(data, layer_size, "1")
+twos = count_chars(data, layer_size, "2")
 
 # part 1
 print("part1")
@@ -50,13 +63,11 @@ print(ones[min_zeros_layer] * twos[min_zeros_layer])
 
 # find first non-transparent in each cell
 
-num_layers = int(len(data)/la)
-img = list(layer(data, 0, la))
-for i in range(1, num_layers):
-    update = layer(data, i, la)
-    for i in range(len(img)):
-        if img[i] == "2":
-            img[i] = update[i]
+img = list(layer(data, 0, layer_size))
+
+for i in range(1, num_layers(data, layer_size)):
+    update = layer(data, i, layer_size)
+    img = [(lambda x, y: y if x == "2" else x)(*p) for p in zip(img, update)]
 
 
 def img_row(d, r, width):
