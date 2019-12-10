@@ -21,12 +21,17 @@
   (let ([lines (file->lines "input.txt")])
     (enum-ast-lines lines 0 '())))
 
+;; asteriods has some size, so cut some decimals
+(define (approx x)
+  (let ([precision 10000])
+    (/ (round (* precision x)) precision)))
+
 (define (polar o p)
   (let* ([decimals 10000]
          [x (- (first p) (first o))]
          [y (- (second o) (second p))]
          [r (sqrt (+ (sqr x) (sqr y)))]
-         [acost (/ (round (* decimals (acos (/ x r)))) decimals)]
+         [acost (approx (acos (/ x r)))]
          [t (if (< 0 y) (- acost) acost)])
     (values t r)))
 
@@ -84,13 +89,17 @@
            [seen (in-sight monsta data (hash))]
            [seenkeys (hash-keys seen)]
            [sortkeys (sort seenkeys (λ (x y) (< x y)))]
-           [filtkeys (filter (λ (x) (> x (- (/ pi 2)))) sortkeys)]
+           [filtkeys (filter (λ (x) (>= x (approx (- (/ pi 2))))) sortkeys)] ;; use same roundoff as when calculating the angles
            [numfilt (length filtkeys)]
+           [blastnum 200]
            )
-      (if (>= 200 numfilt)
-        ;; I'm not really sure why I have to subtract 2...
-        (displayln (format "blast 200th: ~a" (second (hash-ref seen (list-ref sortkeys (- (- 200 numfilt) 2))))))
-        (displayln (format "blast 200th: ~a" (second (hash-ref seen (list-ref filtkeys 199)))))
+      (if (> blastnum numfilt)
+        (displayln (format "blast ~ath: ~a (angle ~a)" blastnum 
+                           (second (hash-ref seen (list-ref sortkeys (- (- blastnum numfilt) 1))))
+                           (list-ref sortkeys (- (- blastnum numfilt) 1))))
+        (displayln (format "blast ~ath: ~a (angle ~a)" blastnum 
+                           (second (hash-ref seen (list-ref filtkeys (- blastnum 1))))
+                           (list-ref filtkeys (- blastnum 1))))
         ))
     ))
 
