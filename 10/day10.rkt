@@ -5,9 +5,7 @@
 
 (define (enum-ast ast x y res)
   (let* ([el (car ast)]
-         ;[newres (if (equal? el "#") (cons (list (+ x 0.5) (+ y 0.5)) res) res)])
          [newres (if (equal? el "#") (cons (list x y) res) res)])
-    ;(displayln (format "(~a,~a): ~a" x y el))
     (if (null? (cdr ast))
       newres
       (enum-ast (cdr ast) (+ x 1) y newres))))
@@ -15,8 +13,6 @@
 (define (enum-ast-lines lines y res)
   (let* ([line (cdr (string-split (car lines) ""))] ; need to chop off the empty "" after split
          [newres (enum-ast line 0 y res)])
-    ;(displayln (format " ~a " (car lines)))
-    ;(displayln (format " ~a " line))
     (if (null? (cdr lines))
       newres
       (enum-ast-lines (cdr lines) (+ y 1) newres))))
@@ -46,7 +42,7 @@
 
       (let-values ([(t r) (polar ast check)])
         (if (hash-ref seen t #f)
-          ;; check if closer
+          ;; check if closer; if so replace.
           (if (< r (first (hash-ref seen t)))
             (if nomore
               (hash-set seen t (list r check))
@@ -91,13 +87,10 @@
            [filtkeys (filter (λ (x) (> x (- (/ pi 2)))) sortkeys)]
            [numfilt (length filtkeys)]
            )
-      (displayln sortkeys)
-      (displayln filtkeys)
-      (displayln numfilt)
       (if (>= 200 numfilt)
         ;; I'm not really sure why I have to subtract 2...
-        (displayln (hash-ref seen (list-ref sortkeys (- (- 200 numfilt) 2))))
-        (displayln (hash-ref seen (list-ref filtkeys 199)))
+        (displayln (format "blast 200th: ~a" (second (hash-ref seen (list-ref sortkeys (- (- 200 numfilt) 2))))))
+        (displayln (format "blast 200th: ~a" (second (hash-ref seen (list-ref filtkeys 199)))))
         ))
     ))
 
