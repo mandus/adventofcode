@@ -152,4 +152,3 @@
 (let ([comp (create-computer #f)]
       [hull (make-hash)])
   (displayln (run-robot comp '())))
-
