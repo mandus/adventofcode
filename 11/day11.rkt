@@ -189,7 +189,7 @@
       ; blank if not in hull or value is 0
       ; # if value is 1
       ; output str when decreasing y; then reset x to minx
-      (let* ([color (if (> (hash-ref hull (list x y) 0) 0) "#" " ")]
+      (let* ([color (if (> (hash-ref hull (list x y) 0) 0) "█" " ")]
              [updstr (format "~a~a" str color)])
         (if (< y miny)
           #t ; we're done.
