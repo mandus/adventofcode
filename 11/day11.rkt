@@ -105,8 +105,8 @@
     (hash-set ic i (string->number v))))
 
 ;;
-;; Define an amplifier with a phase. We define the amp as a closure which
-;; contains data and position, and takes input as an argument.
+;; Define an computer with an input. We define the computer as a closure which
+;; contains data and memory-position, and takes input as an argument.
 ;; is set - then we will not pause on opcode 3 later
 (define (create-computer pause-on-first-input)
   (let* ([ic (hash-copy (str->numb->hash (string-split (string-trim (file->string
@@ -143,12 +143,77 @@
 ; get update for opsition (after trun) as 
 ;   ((exact-round (cos dir)), (exact-round (sin dir))
 
-(define (run-robot comp outputs)
-  (let-values([(op output) (comp 2)])
+(define (direction->move dir)
+  (let ([pi-half (/ pi 2)])
+    (list (exact-round (cos (* dir pi-half)))
+          (exact-round (sin (* dir pi-half))))))
+
+(define (move position direction)
+  (let ([update (direction->move direction)])
+    (list (+ (first position) (first update)) (+ (second position) (second update)))))
+
+;
+; direction = 0: Turn left, i.e add π/2 to the direction
+;           = 1: Turn right, i.e subtract π/2 to the direction
+(define (run-robot comp hull position direction)
+  (let*-values([(input) (hash-ref hull position 0)]   ; default to black
+               [(op color) (comp input)]              ; first get the color
+               [(op changedirection) (if (equal? op 99) 
+                                       (values op 0)  ; keep op; we will stop  
+                                       (comp #f))] ; else, get new direction
+               [(newdirection) (+ direction (if (> changedirection 0) -1 1))]
+               [(newposition) (move position newdirection)])
+
     (if (equal? op 99)
-      (reverse outputs)
-      (run-robot comp (cons output outputs)))))
+      hull
+      (run-robot comp (hash-set hull position color) newposition newdirection))))
+
+(define (bbox coords minx miny maxx maxy)
+  (let* ([chk (car coords)]
+         [x (first chk)]
+         [y (second chk)]
+         [updminx (min minx x)]
+         [updminy (min miny y)]
+         [updmaxx (max maxx x)]
+         [updmaxy (max maxy y)])
+    (if (empty? (cdr coords))
+      (list (list updminx updminy) (list updmaxx updmaxy))
+      (bbox (cdr coords) updminx updminy updmaxx updmaxy))))
+
+(define (draw hull bbox)
+  (let ([minx (first (first bbox))]
+        [miny (second (first bbox))]
+        [maxx (first (second bbox))]
+        [maxy (second (second bbox))])
+    (define (drawinner x y str)
+      ; blank if not in hull or value is 0
+      ; # if value is 1
+      ; output str when decreasing y; then reset x to minx
+      (let* ([color (if (> (hash-ref hull (list x y) 0) 0) "#" " ")]
+             [updstr (format "~a~a" str color)])
+        (if (< y miny)
+          #t ; we're done.
+          (if (> x maxx)
+            ; output str and move on
+            (begin 
+              (displayln updstr)
+              (drawinner minx (- y 1) ""))
+            (drawinner (+ 1 x) y updstr)))))
+    (drawinner minx maxy "")))
 
 (let ([comp (create-computer #f)]
-      [hull (make-hash)])
-  (displayln (run-robot comp '())))
+      [hull (hash)])
+ (displayln (format "part1: ~a" 
+                    (hash-count (run-robot comp hull (list 0 0) 1)))))
+
+(let* ([comp (create-computer #f)]
+       [bigint 100000000]
+       [smallint (- bigint)]
+       [hull (hash-set (hash) (list 0 0) 1)]
+       [paintedhull (run-robot comp hull (list 0 0) 1)]
+       [bb (bbox (hash-keys paintedhull) bigint bigint smallint smallint)])
+
+  (displayln (format "part2:"))
+  (draw paintedhull bb))
+
+
