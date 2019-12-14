@@ -121,7 +121,7 @@
          )
     (define (computer input)
       (let-values ([(op nextpos output updrelbase) (update-ic pos ic input relbase)])
-        ;(displayln (format "~a -> ~a: ~a, ~a, (rb ~a -> ~a)" pos nextpos op output relbase updrelbase))
+        ;(displayln (format "~a -> ~a: ~a, ~a, (rb ~a -> ~a) (inp: ~a)" pos nextpos op output relbase updrelbase input))
         ;(displayln ic)
         (set! pos nextpos)
         (set! relbase updrelbase)
@@ -186,26 +186,34 @@
          )
     sign))
 
-(define (move-paddle paddle balls prevballs newball)
-  (if (or (empty? paddle) 
-          (and (empty? balls) (empty? prevballs) (empty?  newball)))
-    0
-    (let* ([ball (closest-ball balls (car balls) (first paddle))]
-           [prevball (closest-ball prevballs (car prevballs) (first paddle))]
-           )
-      ;(displayln (format "newball: ~a" newball))
-      ;(displayln (format "ball: ~a" ball))
-      (displayln (format "paddle: ~a" paddle))
-      (if (not (empty? newball))
-        (if (> (second ball) (second newball))
-          (if (> (first (first paddle)) (first newball)) ; move up - move paddle towards x of ball
-            -1 
-            (if (< (first (first paddle)) (first newball))
-              1
-              0))
-          (find-sign newball ball (first paddle)))
-        0))))
+(define (sign x y) 
+  (if (equal? x y) 0 (/ (- x y) (abs (- x y)))))
 
+;(define (move-paddle paddle balls prevballs newball)
+;  (if (or (empty? paddle) 
+;          (and (empty? balls) (empty? prevballs) (empty?  newball)))
+;    0
+;    (let* ([ball (closest-ball balls (car balls) (first paddle))]
+;           [prevball (closest-ball prevballs (car prevballs) (first paddle))]
+;           )
+;      ;(displayln (format "newball: ~a" newball))
+;      (displayln (format "ball: ~a" ball))
+;      (displayln (format "paddle: ~a" paddle))
+;      (if (not (empty? newball))
+;        (if (> (second ball) (second newball))
+;          (if (> (first (first paddle)) (first newball)) ; move up - move paddle towards x of ball
+;            -1 
+;            (if (< (first (first paddle)) (first newball))
+;              1
+;              0))
+;          (find-sign newball ball (first paddle)))
+;        0))))
+
+(define (move-paddle paddle balls prevballs newball)
+  (if (and (not (empty? paddle))
+           (not (empty? newball)))
+    (sign (first newball) (first (first paddle)))
+    0))
 
 (define (run-arcade comp tiles input prevballs)
   (let*-values ([(op x) (comp input)]
@@ -215,8 +223,8 @@
                 [(op id) (if (or (equal? op 3) (equal? op 99)) 
                            (values op #f)
                            (comp input))])
-    (when (equal? op 3)
-      (displayln (format "~a: (~a,~a) ~a" op x y id)))
+    ;(when (equal? op 3)
+    ;  (displayln (format "~a: (~a,~a) ~a" op x y id)))
     ;(displayln (format "balls: ~a" (find-blocks tiles 4)))
     (let* ([paddle (find-blocks tiles 3)]
            [presentballs (find-blocks tiles 4)]
@@ -224,7 +232,7 @@
            [newball (if (and (equal? op 4) (equal? id 4)) (list x y) '())]
            [nextinput (move-paddle paddle balls prevballs newball)])
 
-      (displayln (format "next input is: ~a" nextinput))
+      ;(displayln (format "next input is: ~a" nextinput))
       (case op
         [(3) (run-arcade comp tiles nextinput balls)]
         [(4) (if (and (equal? x -1) (equal? y 0))
