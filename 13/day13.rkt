@@ -145,43 +145,103 @@
   (map (λ (x) (car x)) 
        (filter (λ (x) (equal? (cdr x) block)) (hash->list tiles))))
 
-(define (closest-ball balls ball) 
+; find ball closest to the paddle, if more than one
+; ignore balls at same y-coord as the paddle as those are lost
+(define (closest-ball balls ball paddle) 
   (let* ([nextball (car balls)]
-         ...)))
+         [updball (if 
+                    (and (> (second nextball) (second ball)) 
+                         (< (second nextball) (second paddle))) 
+                    nextball 
+                    ball)]
+         )
+    (if (empty? (cdr balls))
+      updball
+      (closest-ball (cdr balls) updball paddle))))
 
-(define (move-paddle paddle balls)
-  ;; first simplistic approach
-  ;; find ball with hights y coord, and move paddle towards it 
-  )
+;; a in ax + b!
+(define (a x y)
+  (/ (- (first x) (first y)) (- (second x) (second y))))
+
+;; b in ax + b - given a and a point p
+(define (b a p)
+  (let* ([x (first p)]
+         [y (second p)]
+         )
+    (- y (* a x))))
+
+;; find x where the line cross y = N
+(define (x a b y)
+  (* (/ 1 a) (- y b)))
+
+(define (find-sign newball oldball paddle)
+  (let* ([A (a newball oldball)]
+         [B (b A newball)]
+         [X (x A B (second paddle))]
+         [sign (if (> X (first paddle)) 
+                 1 
+                 (if (< X (first paddle)) 
+                   -1 
+                   0))]
+         )
+    sign))
+
+(define (move-paddle paddle balls prevballs newball)
+  (if (or (empty? paddle) 
+          (and (empty? balls) (empty? prevballs) (empty?  newball)))
+    0
+    (let* ([ball (closest-ball balls (car balls) (first paddle))]
+           [prevball (closest-ball prevballs (car prevballs) (first paddle))]
+           )
+      ;(displayln (format "newball: ~a" newball))
+      ;(displayln (format "ball: ~a" ball))
+      (displayln (format "paddle: ~a" paddle))
+      (if (not (empty? newball))
+        (if (> (second ball) (second newball))
+          (if (> (first (first paddle)) (first newball)) ; move up - move paddle towards x of ball
+            -1 
+            (if (< (first (first paddle)) (first newball))
+              1
+              0))
+          (find-sign newball ball (first paddle)))
+        0))))
 
 
-(define (run-arcade comp tiles input)
+(define (run-arcade comp tiles input prevballs)
   (let*-values ([(op x) (comp input)]
-                [(op y) (if (equal? op 99) (values op #f) 
+                [(op y) (if (or (equal? op 3) (equal? op 99)) 
+                          (values op #f) 
                           (comp input))]
-                [(op id) (if (equal? op 99) (values op #f)
+                [(op id) (if (or (equal? op 3) (equal? op 99)) 
+                           (values op #f)
                            (comp input))])
-    ;(displayln (format "(~a,~a) ~a" x y id))
+    (when (equal? op 3)
+      (displayln (format "~a: (~a,~a) ~a" op x y id)))
+    ;(displayln (format "balls: ~a" (find-blocks tiles 4)))
     (let* ([paddle (find-blocks tiles 3)]
-           [balls (find-blocks tiles 4)])
-      (
-       (displayln (find-blocks tiles 4)); where is the ball
-       (displayln (find-blocks tiles 3)); where is the paddle
-       (if (equal? op 99)
-         tiles
-         (if (and (equal? x -1) (equal? y 0))
-           (begin
-             (displayln (format "current score: ~a" id))
-             (run-arcade comp tiles input))
-           (run-arcade comp (hash-set tiles (list x y) id) input))))))
+           [presentballs (find-blocks tiles 4)]
+           [balls (if (empty? presentballs) prevballs presentballs)]
+           [newball (if (and (equal? op 4) (equal? id 4)) (list x y) '())]
+           [nextinput (move-paddle paddle balls prevballs newball)])
 
+      (displayln (format "next input is: ~a" nextinput))
+      (case op
+        [(3) (run-arcade comp tiles nextinput balls)]
+        [(4) (if (and (equal? x -1) (equal? y 0))
+               (begin
+                 (displayln (format "current score: ~a" id))
+                 (run-arcade comp tiles nextinput balls))
+               (run-arcade comp (hash-set tiles (list x y) id) nextinput balls))]
+        [(99) tiles]))))
+      
 (define (count-blocks tiles block)
   (length (filter (λ (x) (equal? (cdr x) block)) (hash->list tiles))))
 
 (let ([comp (create-computer #t #t)]
       [tiles (hash)])
- (displayln (format "part1: ~a" 
-                    (count-blocks (run-arcade comp tiles 0) 2))))
+  (count-blocks (run-arcade comp tiles 0 '()) 2))
+; (displayln (format "part1: ~a" 
+;                    (count-blocks  2))))
 
 
 ;
