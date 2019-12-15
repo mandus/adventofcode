@@ -35,13 +35,28 @@
       (values (second produce) (list (string->number (first produce)) consume)))))
 
 
+(define (run-reaction-find-min 
+          chemicals ore stack make-perms multiple minore minstack)
+  (let*-values 
+    ([(permore permstack) 
+      (run-reaction chemicals ore stack (car make-perms) multiple)]
+     [(update-min) (or (not minore) (< permore minore))]
+     [(updore updstack) (if update-min 
+                           (values permore permstack) 
+                           (values minore minstack))]
+     )
+    (if (empty? (cdr make-perms))
+      (values updore updstack)
+      (run-reaction-find-min 
+        chemicals ore stack (cdr make-perms) multiple updore updstack))))
+
 (define (run-reaction chemicals ore stack make multiple)
   (for/fold ([oreacc ore]
              [leftovers stack])
     ([r make])
     (begin
-      (displayln (format "fold with ~a, mul ~a " r multiple))
-      (displayln (format "acc.ore ~a (left ~a)" oreacc leftovers))
+      ;(displayln (format "fold with ~a, mul ~a " r multiple))
+      ;(displayln (format "acc.ore ~a (left ~a)" oreacc leftovers))
       ; consume available leftovers first
       (let* ([has-leftovers (hash-ref leftovers (first r) 0)]
              [use-leftovers (min has-leftovers 
@@ -49,8 +64,8 @@
              [adjusted-leftovers 
                (hash-set leftovers (first r) (- has-leftovers use-leftovers))]
              [adjusted-ask-num (- (* multiple (second r)) use-leftovers)])
-        (displayln 
-          (format "Use ~a of ~a from leftovers~%" use-leftovers (first r)))
+;        (displayln 
+;          (format "Use ~a of ~a from leftovers~%" use-leftovers (first r)))
         (reaction chemicals 
                   (first r) 
                   (hash-ref chemicals (first r)) 
@@ -70,11 +85,12 @@
   ; in the end, return ore-count
   (let* ([produce (first recipe)]
          [make (second recipe)]
+         [primary (first make)]
          [multiple (ceiling (/ num produce))]
-         [leftover (- (* multiple produce) num)]  ; left-over multiplier
+         [leftover (- (* multiple produce) num)]  ; left-overs 
          )
-    (displayln (format "~a ~a with recipe ~a (produce: ~a, mul: ~a, left: ~a) (have left ~a)" num prod
-                       recipe produce multiple leftover (hash-ref stack prod 0)))
+;        (displayln (format "~a ~a with recipe ~a (produce: ~a, mul: ~a, left: ~a) (have left ~a)" num prod
+;                           recipe produce multiple leftover (hash-ref stack prod 0)))
     ;(displayln (format "recipe length ~a" (length make)))
     ; (displayln (format "first to make ~a" (first make)))
 
@@ -82,42 +98,70 @@
     ;                       (and (equal? 1 (length make)) 
     ;                            (equal? "ORE" (first (first make))))))
     ;(displayln ore)
-    (displayln stack)
-    (displayln 
-      (format "prod ~a left on stack: ~a" prod (hash-ref stack prod 0)))
+    ;(displayln stack)
+    ;    (displayln 
+    ;      (format "prod ~a left on stack: ~a" prod (hash-ref stack prod 0)))
 
     ;; consume stack of prod if available
-    (if (<= num (hash-ref stack prod 0))
-      (values ore
-              (hash-set stack prod (- (hash-ref stack prod) num)))
+    ;(if (<= num (hash-ref stack prod 0))
+    ;  (values ore
+    ;          (hash-set stack prod (- (hash-ref stack prod) num)))
 
-      ;; else check if we can make with just ORE
-      (if (and (equal? 1 (length make)) 
-               (equal? "ORE" (first (first make))))
-        (begin 
-          (displayln (format ">>> add ~a ore for prod ~a (mul ~a, recipe ~a)" 
-                             (* multiple (second (first make)))
-                             prod
-                             multiple
-                             (first make)))
-          (values (+ ore (* multiple (second (first make))))
-                  (hash-set stack prod (+ (hash-ref stack prod 0) leftover))))
+    ;; check if we can make prod with just ORE
+    (if (and (equal? 1 (length make)) 
+             (equal? "ORE" (first primary)))
+      (begin 
+        ;          (displayln (format ">>> add ~a ore for prod ~a (mul ~a, recipe ~a)" 
+        ;                             (* multiple (second (first make)))
+        ;                             prod
+        ;                             multiple
+        ;                             (first make)))
+        (values (+ ore (* multiple (second primary)))
+                (hash-set stack prod (+ (hash-ref stack prod 0) leftover))))
 
 
-        ;; else run full recipe
-        ;; we need to run all permutations of the recipe, since they may
-        ;; require different amount of ORE
-        (run-reaction chemicals ore stack make multiple)))))
+      ;; else run full recipe
+      ;; we need to run all permutations of the recipe, since they may
+      ;; require different amount of ORE
+      (begin
+        ;(displayln (permutations make))
+        (let-values 
+          ([(findore findstack) 
+            (run-reaction
+              chemicals ore stack make multiple)])
+          (values findore 
+                  (hash-set 
+                    findstack 
+                    prod (+ (hash-ref findstack prod 0) leftover))))))))
+
+(define (search-max-fuel chemicals upper lower target test)
+  (let*-values 
+    ([(ore leftovers) 
+      (reaction chemicals "FUEL" (hash-ref chemicals "FUEL") test (hash) 0)])
+  (if (> 2 (- upper lower))
+    (values upper lower ore test)
+    (if (> ore target)
+      (search-max-fuel chemicals test lower target 
+                       (floor (+ lower (/ (- test lower) 2))))
+      (search-max-fuel chemicals upper test target 
+                       (ceiling (+ test (/ (- upper test) 2))))))))
 
 (define (solve-data data)
   (let*-values ([(lines) (map string-trim (string-split data "\n"))]
                 [(chemicals) (lines->map lines)]
                 [(ore leftovers)
-                 (reaction chemicals "FUEL" (hash-ref chemicals "FUEL") 1 (hash) 0)])
+                 (reaction chemicals "FUEL" (hash-ref chemicals "FUEL") 1 (hash) 0)]
+                [(oresupply) 1000000000000]
+                [(upper lower testore lasttest) 
+                 (search-max-fuel chemicals oresupply 1 oresupply 
+                                  (floor (/ oresupply 2)))])
     ;(displayln lines)
     ;(displayln chemicals)
     (displayln 
-      (format "used ~a ORE to produce FUEL (leftovers: ~a" ore leftovers))))
+      (format "used ~a ORE to produce FUEL (leftovers: ~a" ore leftovers))
+    (displayln (format "Can produce ~a ~a fuels (~a: ~a)" upper lower testore lasttest))))
+
+; 82892753 
 
 ; with test-data
 ;(let* ([data " 10 ORE => 10 A 
@@ -148,38 +192,38 @@
             3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT"])
             (solve-data data))
 
-;(let ([data "2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
-;            17 NVRVD, 3 JNWZP => 8 VPVL
-;            53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
-;            22 VJHF, 37 MNCFX => 5 FWMGM
-;            139 ORE => 4 NVRVD
-;            144 ORE => 7 JNWZP
-;            5 MNCFX, 7 RFSQX, 2 FWMGM, 2 VPVL, 19 CXFTF => 3 HVMC
-;            5 VJHF, 7 MNCFX, 9 VPVL, 37 CXFTF => 6 GNMV
-;            145 ORE => 6 MNCFX
-;            1 NVRVD => 8 CXFTF
-;            1 VJHF, 6 MNCFX => 4 RFSQX
-;            176 ORE => 6 VJHF"])
-;            (solve-data data))
+(let ([data "2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
+            17 NVRVD, 3 JNWZP => 8 VPVL
+            53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
+            22 VJHF, 37 MNCFX => 5 FWMGM
+            139 ORE => 4 NVRVD
+            144 ORE => 7 JNWZP
+            5 MNCFX, 7 RFSQX, 2 FWMGM, 2 VPVL, 19 CXFTF => 3 HVMC
+            5 VJHF, 7 MNCFX, 9 VPVL, 37 CXFTF => 6 GNMV
+            145 ORE => 6 MNCFX
+            1 NVRVD => 8 CXFTF
+            1 VJHF, 6 MNCFX => 4 RFSQX
+            176 ORE => 6 VJHF"])
+            (solve-data data))
 
-;(let ([data "171 ORE => 8 CNZTR
-;            7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL
-;            114 ORE => 4 BHXH
-;            14 VRPVC => 6 BMBT
-;            6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL
-;            6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT
-;            15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW
-;            13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW
-;            5 BMBT => 4 WPTQ
-;            189 ORE => 9 KTJDG
-;            1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP
-;            12 VRPVC, 27 CNZTR => 2 XDBXC
-;            15 KTJDG, 12 BHXH => 5 XCVML
-;            3 BHXH, 2 VRPVC => 7 MZWV
-;            121 ORE => 7 VRPVC
-;            7 XCVML => 6 RJRHP
-;            5 BHXH, 4 VRPVC => 5 LTCX"])
-;            (solve-data data))
+(let ([data "171 ORE => 8 CNZTR
+            7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL
+            114 ORE => 4 BHXH
+            14 VRPVC => 6 BMBT
+            6 BHXH, 18 KTJDG, 12 WPTQ, 7 PLWSL, 31 FHTLT, 37 ZDVW => 1 FUEL
+            6 WPTQ, 2 BMBT, 8 ZLQW, 18 KTJDG, 1 XMNCP, 6 MZWV, 1 RJRHP => 6 FHTLT
+            15 XDBXC, 2 LTCX, 1 VRPVC => 6 ZLQW
+            13 WPTQ, 10 LTCX, 3 RJRHP, 14 XMNCP, 2 MZWV, 1 ZLQW => 1 ZDVW
+            5 BMBT => 4 WPTQ
+            189 ORE => 9 KTJDG
+            1 MZWV, 17 XDBXC, 3 XCVML => 2 XMNCP
+            12 VRPVC, 27 CNZTR => 2 XDBXC
+            15 KTJDG, 12 BHXH => 5 XCVML
+            3 BHXH, 2 VRPVC => 7 MZWV
+            121 ORE => 7 VRPVC
+            7 XCVML => 6 RJRHP
+            5 BHXH, 4 VRPVC => 5 LTCX"])
+            (solve-data data))
 
-;(let* ([data (file->string "input.txt")])
-;  (solve-data  data))
+(let* ([data (file->string "input.txt")])
+  (solve-data  data))
