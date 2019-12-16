@@ -1,20 +1,6 @@
 #!/usr/bin/env racket
 #lang racket
 
-;; h -> immutable hashmap
-;(define (lines->hash lines h)
-;  (let* ([line (car lines)]
-;         [part (string-split line "=>")]
-;         [produce (second part)]
-;         [consume (first part)]
-;         [updh (hash-set h produce consume)]
-;         [linesleft (cdr lines)])
-;    
-;    (displayln (format "~a from (~a)" produce consume))
-;    (if (empty? linesleft)
-;      updh
-;      (lines->hash linesleft updh))))
-
 ; create an hash map with the following format:
 ; Chemical -> (num, ((chemical num), (chemical num)...))
 ; The key is the chemical produced
@@ -34,29 +20,11 @@
                       (map string-trim (string-split (first part) ",")))])
       (values (second produce) (list (string->number (first produce)) consume)))))
 
-
-(define (run-reaction-find-min 
-          chemicals ore stack make-perms multiple minore minstack)
-  (let*-values 
-    ([(permore permstack) 
-      (run-reaction chemicals ore stack (car make-perms) multiple)]
-     [(update-min) (or (not minore) (< permore minore))]
-     [(updore updstack) (if update-min 
-                           (values permore permstack) 
-                           (values minore minstack))]
-     )
-    (if (empty? (cdr make-perms))
-      (values updore updstack)
-      (run-reaction-find-min 
-        chemicals ore stack (cdr make-perms) multiple updore updstack))))
-
 (define (run-reaction chemicals ore stack make multiple)
   (for/fold ([oreacc ore]
              [leftovers stack])
     ([r make])
     (begin
-      ;(displayln (format "fold with ~a, mul ~a " r multiple))
-      ;(displayln (format "acc.ore ~a (left ~a)" oreacc leftovers))
       ; consume available leftovers first
       (let* ([has-leftovers (hash-ref leftovers (first r) 0)]
              [use-leftovers (min has-leftovers 
@@ -64,8 +32,6 @@
              [adjusted-leftovers 
                (hash-set leftovers (first r) (- has-leftovers use-leftovers))]
              [adjusted-ask-num (- (* multiple (second r)) use-leftovers)])
-;        (displayln 
-;          (format "Use ~a of ~a from leftovers~%" use-leftovers (first r)))
         (reaction chemicals 
                   (first r) 
                   (hash-ref chemicals (first r)) 
@@ -89,42 +55,18 @@
          [multiple (ceiling (/ num produce))]
          [leftover (- (* multiple produce) num)]  ; left-overs 
          )
-;        (displayln (format "~a ~a with recipe ~a (produce: ~a, mul: ~a, left: ~a) (have left ~a)" num prod
-;                           recipe produce multiple leftover (hash-ref stack prod 0)))
-    ;(displayln (format "recipe length ~a" (length make)))
-    ; (displayln (format "first to make ~a" (first make)))
-
-    ;    (displayln (format "bool exp: ~a" 
-    ;                       (and (equal? 1 (length make)) 
-    ;                            (equal? "ORE" (first (first make))))))
-    ;(displayln ore)
-    ;(displayln stack)
-    ;    (displayln 
-    ;      (format "prod ~a left on stack: ~a" prod (hash-ref stack prod 0)))
-
     ;; consume stack of prod if available
-    ;(if (<= num (hash-ref stack prod 0))
-    ;  (values ore
-    ;          (hash-set stack prod (- (hash-ref stack prod) num)))
 
     ;; check if we can make prod with just ORE
     (if (and (equal? 1 (length make)) 
              (equal? "ORE" (first primary)))
       (begin 
-        ;          (displayln (format ">>> add ~a ore for prod ~a (mul ~a, recipe ~a)" 
-        ;                             (* multiple (second (first make)))
-        ;                             prod
-        ;                             multiple
-        ;                             (first make)))
         (values (+ ore (* multiple (second primary)))
                 (hash-set stack prod (+ (hash-ref stack prod 0) leftover))))
 
 
       ;; else run full recipe
-      ;; we need to run all permutations of the recipe, since they may
-      ;; require different amount of ORE
       (begin
-        ;(displayln (permutations make))
         (let-values 
           ([(findore findstack) 
             (run-reaction
@@ -155,8 +97,6 @@
                 [(upper lower testore lasttest) 
                  (search-max-fuel chemicals oresupply 1 oresupply 
                                   (floor (/ oresupply 2)))])
-    ;(displayln lines)
-    ;(displayln chemicals)
     (displayln 
       (format "used ~a ORE to produce FUEL (leftovers: ~a" ore leftovers))
     (displayln (format "Can produce ~a ~a fuels (~a: ~a)" upper lower testore lasttest))))
