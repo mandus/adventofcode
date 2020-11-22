@@ -17,9 +17,16 @@
 
 (defvar *debug* nil)
 
+; (defun read-input (fn)
+;   (iter (for line in-file fn using #'read-line)
+;         (collect (parse-integer line))))
+
+; the in-file of iter is convenient (above), but we can do 
+; the same with just using "loop":
 (defun read-input (fn)
-  (iter (for line in-file fn using #'read-line)
-        (collect (parse-integer line))))
+  (with-open-file (f fn)
+    (loop for line = (read-line f nil)
+          while line collect (parse-integer line))))
 
 (defun fuel-for-mass (mass)
   (- (truncate  mass 3) 2))
