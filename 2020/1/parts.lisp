@@ -6,7 +6,9 @@
 
 (uiop:define-package 
   :aoc
-  (:use :cl))
+  (:use :cl)
+  (:export :run)
+  )
 
 (unless swank::*connections* 
   (swank:create-server :port 4005 :dont-close t))
@@ -86,15 +88,74 @@
           (tritrav nxtlst)
           (values e1 e2 e3)))))
 
+
+;; more generic code solving both parts - but not sure if it works for more than 3.
+;;
+(defun lsearch (target lst)
+  (let* ((elm (car lst))
+         (nxtlst (rest lst))
+         (tst (cons elm target))
+         (tstval (reduce '+ tst))
+         )
+    (when *debug*
+      (format t "test ~a: ~a~%" tst tstval))
+    (cond
+      ((< 2020 tstval) nil)
+      ((> 2020 tstval)
+       (if nxtlst 
+           (lsearch target nxtlst)
+           nil))
+      ((= 2020 tstval)
+       tst))))
+
+(defun trav-1 (lst depth elm state)
+
+  (let* ((target (cons elm state)))
+    (when *debug* 
+    (format t "(~a) ~a ~a [~a] ~a~%" depth elm state target lst))
+
+  (cond
+    ((>= 1 depth) 
+     (let ((res (lsearch target lst))
+           (nxtlst (rest lst))
+           ) 
+       (if (not res) 
+           (if nxtlst 
+               (trav-1 nxtlst depth (car lst) state)
+               nil)
+           res
+           )))
+    (t (trav-1 (rest lst) (1- depth) (car lst) target))
+    )))
+
+(defun trav (lst depth)
+  (let ((res (trav-1 (rest lst) depth (car lst) nil))
+        )
+   (if res
+       res
+       (trav (rest lst) depth))))
+
+
+;; drivers
+;;
 (defun part1 (fn)
   (let* ((data (read-input fn))
          (items (sort (loop for d in data collect (transform d)) '<))
+         (res (trav items 1))
          ;(processed (reduce '+ items))
          )
     (format t "Part 1~%")
     (multiple-value-bind (l r) (traverse items)
-      (format t "~a and ~a: ~a~%" l r (* l r))
-      )
+      (format t "~a and ~a: ~a~%" l r (* l r)))
+    (format t "~a: ~a~%" res (reduce '* res))
+
+    ; just find with a loop  - give result twice. Still more than fast enough
+    (format t "loop: ~a~%" 
+            (loop for e1 in items append 
+                  (loop for e2 in (remove-if-not (lambda (x) (>= x e1)) items) 
+                        if (= 2020 (+ e1 e2))
+                        collect (* e1 e2))))
+
     (when *debug*
       (format t "~a~%" data)
       (format t "~a~%" items)) 
@@ -105,10 +166,20 @@
 (defun part2 (fn)
   (let* ((data (read-input fn))
          (items (sort (loop for d in data collect (transform d)) '<))
+         (res (trav items 2))
          )
     (format t "Part 2~%")
     (multiple-value-bind (e1 e2 e3) (tritrav items)
       (format t "~a, ~a, ~a: ~a~%" e1 e2 e3 (* e1 e2 e3)))
+    (format t "~a: ~a~%" res (reduce '* res))
+
+    ; loop - much simpler...
+    (format t "loop: ~a~%" 
+            (loop for e1 in items append
+                  (loop for e2 in (remove-if-not (lambda (x) (>= x e1)) items) append
+                        (loop for e3 in (remove-if-not (lambda (x) (>= x e2)) items)
+                              if (= 2020 (+ e1 e2 e3))
+                              collect (* e1 e2 e3)))))
     )
   )
 
