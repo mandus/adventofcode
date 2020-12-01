@@ -17,8 +17,9 @@
 
 (defparameter *debug* nil)
 
-;(defparameter *inp* "input_test.txt")
-(defparameter *inp* "input.txt")
+(defparameter *inp* "input_test.txt")
+;(defparameter *inp* "input.txt")
+(defparameter *target* 2020)
 
 (defun read-input (fn)
   (with-open-file (f fn)
@@ -188,3 +189,53 @@
 (defun run ()
   (part1 *inp*)
   (part2 *inp*))
+
+
+;; thinking more about combinations 
+;; From SO: comb k (x:xs) = [x:ys | ys <- comb (k-1) xs] ++ comb k xs
+;; 
+;; i.e 
+;; (comb (k lst) 
+;;  (let ((x (car lst))
+;;        (xs (rest lst)))
+;;
+;;   if k == 0: return nil (empty list)
+;;   if k > len(lst): return nil (too long)
+;;   if k == len(lst): reurn [xs] 
+;;
+;;   (append ( x and all (comb (1- k) xs))
+;;           (comb k xs))))
+;;
+;;  The problem here is how we should write the combination of x and (comb (1- k_xs)
+;;
+;;  Not directly applicable to this problem though.
+
+(defun targetsum (lst) 
+  (= *target* (reduce '+ lst)))
+
+(defun elms (pred lst elm &optional acc)
+   (let* ((head (car lst)) 
+          (nxt (rest lst))
+          (addelm (cons elm head))
+          (tst (funcall pred addelm))
+          (nxtacc (if tst (cons addelm acc) acc)))
+
+     (if nxt
+         (elms pred nxt elm nxtacc)
+          nxtacc)))
+
+
+(defun combs (pred k lst)
+  (let* ((head (car lst))
+         (nxt (rest lst))
+         )
+    (cond
+      ((= k 0) nil)
+      ((> k (length lst)) nil)
+      ((= k (length lst)) (if (funcall pred lst) (list lst) nil))
+
+      (t (append (elms pred (combs pred (1- k) nxt) head)
+                 (combs pred k nxt))))))
+
+;(combs 'targetsum 3 '(1 2 3 4 5))
+(combs 'targetsum 2 (loop for d in (read-input *inp*) collect (transform d)))
