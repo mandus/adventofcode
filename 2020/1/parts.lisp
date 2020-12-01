@@ -147,9 +147,10 @@
     (format t "Part 1~%")
     (multiple-value-bind (l r) (traverse items)
       (format t "~a and ~a: ~a~%" l r (* l r)))
+
     (format t "~a: ~a~%" res (reduce '* res))
 
-    ; just find with a loop  - give result twice. Still more than fast enough
+    ; just find with a loop 
     (format t "loop: ~a~%" 
             (loop for e1 in items append 
                   (loop for e2 in (remove-if-not (lambda (x) (>= x e1)) items) 
@@ -171,6 +172,7 @@
     (format t "Part 2~%")
     (multiple-value-bind (e1 e2 e3) (tritrav items)
       (format t "~a, ~a, ~a: ~a~%" e1 e2 e3 (* e1 e2 e3)))
+
     (format t "~a: ~a~%" res (reduce '* res))
 
     ; loop - much simpler...
@@ -182,7 +184,6 @@
                               collect (* e1 e2 e3)))))
     )
   )
-
 
 (defun run ()
   (part1 *inp*)
