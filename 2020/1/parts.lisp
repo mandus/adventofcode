@@ -17,8 +17,8 @@
 
 (defparameter *debug* nil)
 
-(defparameter *inp* "input_test.txt")
-;(defparameter *inp* "input.txt")
+;(defparameter *inp* "input_test.txt")
+(defparameter *inp* "input.txt")
 (defparameter *target* 2020)
 
 (defun read-input (fn)
@@ -193,22 +193,11 @@
 
 ;; thinking more about combinations 
 ;; From SO: comb k (x:xs) = [x:ys | ys <- comb (k-1) xs] ++ comb k xs
-;; 
-;; i.e 
-;; (comb (k lst) 
-;;  (let ((x (car lst))
-;;        (xs (rest lst)))
-;;
-;;   if k == 0: return nil (empty list)
-;;   if k > len(lst): return nil (too long)
-;;   if k == len(lst): reurn [xs] 
-;;
-;;   (append ( x and all (comb (1- k) xs))
-;;           (comb k xs))))
-;;
-;;  The problem here is how we should write the combination of x and (comb (1- k_xs)
-;;
-;;  Not directly applicable to this problem though.
+
+;; nicer solution.
+
+(defun candidatessum (lst) 
+  (>= *target* (reduce '+ lst)))
 
 (defun targetsum (lst) 
   (= *target* (reduce '+ lst)))
@@ -224,8 +213,8 @@
          (elms pred nxt elm nxtacc)
           nxtacc)))
 
-
 (defun combs (pred k lst)
+  "Find all combinations of unique (independent of order) sublists of length k; remove if predicate is not true"
   (let* ((head (car lst))
          (nxt (rest lst))
          )
@@ -237,5 +226,5 @@
       (t (append (elms pred (combs pred (1- k) nxt) head)
                  (combs pred k nxt))))))
 
-;(combs 'targetsum 3 '(1 2 3 4 5))
-(combs 'targetsum 2 (loop for d in (read-input *inp*) collect (transform d)))
+(reduce '* (car (remove-if-not 'targetsum (combs 'candidatessum 2 (loop for d in (read-input *inp*) collect (transform d))))))
+(reduce '* (car (remove-if-not 'targetsum (combs 'candidatessum 3 (loop for d in (read-input *inp*) collect (transform d))))))
