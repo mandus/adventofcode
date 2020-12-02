@@ -1,0 +1,109 @@
+; AoC 2020 - Åsmund Ødegård
+;
+; run: sbcl --load parts.lisp
+
+(ql:quickload :swank)
+(ql:quickload :cl-ppcre)
+
+(uiop:define-package 
+  :aoc
+  (:use :cl)
+  (:export :run)
+  )
+
+(unless swank::*connections* 
+  (swank:create-server :port 4005 :dont-close t))
+
+(in-package :aoc)
+
+(defparameter *debug* nil)
+;(defparameter *inp* "input_test.txt")
+(defparameter *inp* "input.txt")
+
+
+(defun read-input (fn)
+  (with-open-file (f fn)
+    (loop for line = (read-line f nil)
+          while line collect line)))
+
+(defun transform (elm)
+  (cl-ppcre:split " " elm))
+
+(defun check-p1 (entry)
+  "entry is ('min-max', 'str:', 'pw') - check if number of 'str' is within min-max in pw"
+  (let* ((minmax (mapcar 'parse-integer (cl-ppcre:split "-" (car entry))))
+         (chr (string-trim ":" (second entry)))
+         (pw (third entry))
+         (matches (cl-ppcre:all-matches-as-strings chr pw))
+         (nummatches (length matches))
+         )
+    (when *debug*
+      (format t "~a ~a ~a: ~a [~a]~%" minmax chr pw matches nummatches))
+    (if (and (<= (first minmax) nummatches)
+             (>= (second minmax) nummatches))
+        t
+        nil)
+    ))
+
+(defun pwcheck (pos pw chr &optional (cnt 0))
+  (let* ((curpos (car pos))
+         (match (string= pw chr :start1 (1- curpos) :end1 curpos))
+         (newcnt (if match (1+ cnt) cnt))
+         )
+    (if (rest pos)
+        (pwcheck (rest pos) pw chr newcnt)
+        newcnt
+        )
+    ))
+
+(defun check-p2 (entry)
+  "entry is ('min-max', 'str:', 'pw') - check if number of 'str' is within min-max in pw"
+  (let* ((pos (mapcar 'parse-integer (cl-ppcre:split "-" (car entry))))
+         (chr (string-trim ":" (second entry)))
+         (pw (third entry))
+         (matches (pwcheck pos pw chr))
+         )
+    (when *debug* 
+      (format t "~a ~a ~a: [~a]~%" pos chr pw matches ))
+    (if (= 1 matches) t nil)
+    ))
+
+
+;; drivers
+;;
+(defun part1 (fn)
+  (let* ((data (read-input fn))
+         (items (loop for d in data collect (transform d)))
+         (checks (loop for d in items collect (check-p1 d)))
+         (numtrue (count-if-not #'not checks))
+         ;(processed (reduce '+ items))
+         )
+    (format t "Part 1~%")
+    (format t "true: ~a~%" numtrue)
+
+    (when *debug*
+      (format t "~a~%" data)
+      (format t "~a~%" items)
+      (format t "~a~%" checks)
+      ) 
+    )
+  )
+
+(defun part2 (fn)
+  (let* ((data (read-input fn))
+         (items (loop for d in data collect (transform d)))
+         (checks (loop for d in items collect (check-p2 d)))
+         (numtrue (count-if-not #'not checks))
+         )
+    (format t "Part 2~%")
+    (format t "true: ~a~%" numtrue)
+
+    (when *debug*
+      (format t "checks: ~a~%" checks)
+      )
+    )
+  )
+
+(defun run ()
+  (part1 *inp*)
+  (part2 *inp*))
