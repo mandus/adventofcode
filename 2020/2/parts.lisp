@@ -20,11 +20,13 @@
 ;(defparameter *inp* "input_test.txt")
 (defparameter *inp* "input.txt")
 
+; default "transform" for reader
+(defun noop (x) x)
 
-(defun read-input (fn)
+(defun read-input (fn &optional (trans 'noop))
   (with-open-file (f fn)
     (loop for line = (read-line f nil)
-          while line collect line)))
+          while line collect (funcall trans line))))
 
 (defun transform (elm)
   (cl-ppcre:split " " elm))
@@ -72,8 +74,7 @@
 ;; drivers
 ;;
 (defun part1 (fn)
-  (let* ((data (read-input fn))
-         (items (loop for d in data collect (transform d)))
+  (let* ((items (read-input fn 'transform))
          (checks (loop for d in items collect (check-p1 d)))
          (numtrue (count-if-not #'not checks))
          ;(processed (reduce '+ items))
@@ -90,8 +91,7 @@
   )
 
 (defun part2 (fn)
-  (let* ((data (read-input fn))
-         (items (loop for d in data collect (transform d)))
+  (let* ((items (read-input fn 'transform))
          (checks (loop for d in items collect (check-p2 d)))
          (numtrue (count-if-not #'not checks))
          )

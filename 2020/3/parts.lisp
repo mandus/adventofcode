@@ -20,11 +20,11 @@
 ;(defparameter *inp* "input_test.txt")
 (defparameter *inp* "input.txt")
 
-
-(defun read-input (fn)
+(defun noop (x) x)
+(defun read-input (fn &optional (trans 'noop))
   (with-open-file (f fn)
     (loop for line = (read-line f nil)
-          while line collect line)))
+          while line collect (funcall trans line))))
 
 (defun transform (elm)
   (cl-ppcre:split " " elm))
