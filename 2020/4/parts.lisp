@@ -43,9 +43,7 @@
 
 (defun field-int-limits (val low up)
    (let ((ival (if (and val (every #'digit-char-p val)) (parse-integer val) nil)))
-     (if ival
-         (and (>= ival low) (<= ival up))
-         nil)))
+     (<= low ival up)))
 
 ; byr (Birth Year) - four digits; at least 1920 and at most 2002.
 (defun p-byr-p (p)
@@ -67,6 +65,7 @@
          (h (car hlst))
          (ih (if (and h (every #'digit-char-p h)) (parse-integer h) nil)))
     (and (= 1 (length hlst))
+         ; possible simplification - reuse the field-int-limits func; i.e (field-int-limits h low up)
          ih
          (<= low ih)
          (>= up ih))))
