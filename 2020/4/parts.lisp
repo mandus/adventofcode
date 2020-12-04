@@ -27,9 +27,16 @@
     (format t "add line '~a' to [~a]~%" line p))
   (cond 
     ((= 0 (length line)) p)
-    (t (loop for (key value) in (mapcar (lambda (x) (cl-ppcre:split ":" x)) (cl-ppcre:split " " line))
-             for upd-p = (acons key value p) then (acons key value upd-p)
-             finally (return upd-p)))))
+    (t 
+     ; suggestion from phil_g@reddit - I like it better since it saves one acons.
+     (reduce (lambda (upd-p pair) (acons (car pair) (cadr pair) upd-p))
+               (mapcar (lambda (x) (cl-ppcre:split ":" x)) (cl-ppcre:split " " line))
+               :initial-value p) 
+
+     ; (loop for (key value) in (mapcar (lambda (x) (cl-ppcre:split ":" x)) (cl-ppcre:split " " line))
+     ;         for upd-p = (acons key value p) then (acons key value upd-p)
+     ;         finally (return upd-p))
+     )))
 
 (defun get-field (p f)
   (cdr (assoc f p :test #'string=)))
