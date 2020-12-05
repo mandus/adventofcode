@@ -32,17 +32,19 @@
     (cdr (assoc chr chrmap :test #'string=))))
 
 (defun dec-row (seat) 
-  (parse-integer (map 'string #'char-bit (subseq seat 0 7)) :radix 2))
+  (parse-integer (subseq seat 0 7) :radix 2))
 
 (defun dec-column (seat) 
   ; my first attempt
   ; (parse-integer (coerce (mapcar #'char-bit (coerce (subseq seat 7 10) 'list)) 'string) :radix 2)]
-  ; better to just map directly, suggestion from landimatte@reddit
-  (parse-integer (map 'string #'char-bit (subseq seat 7 10)) :radix 2))
+  ; better to just map directly; as suggested from landimatte@reddit 
+  ; and then also map all bits in one go (in seat-to-id), saves a lot of map'ing!
+  (parse-integer (subseq seat 7 10) :radix 2))
 
-(defun seat-to-id (seat) 
-  (let ((row (dec-row seat))
-        (column (dec-column seat)))
+(defun seat-to-id (binseat) 
+  (let* ((seat (map 'string #'char-bit binseat))
+         (row (dec-row seat))
+         (column (dec-column seat)))
     (+ (* row 8) column)))
 
 ;; drivers
@@ -52,7 +54,6 @@
          )
     (format t "Part 1~%")
     (format t "max id: ~a~%" (apply #'max data))
-
 
     (when *debug*
       (format t "data: ~a~%" data))))
