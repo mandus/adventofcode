@@ -3,7 +3,7 @@
 ; run: sbcl --quit --load parts.lisp --eval '(aoc:run)'
 
 (ql:quickload :swank)
-(ql:quickload :cl-ppcre)
+(ql:quickload :alexandria)
 
 (uiop:define-package 
   :aoc
@@ -16,22 +16,39 @@
 
 (in-package :aoc)
 
-(defparameter *debug* t)
-(defparameter *inp* "input_test.txt")
-;(defparameter *inp* "input.txt")
+(defparameter *debug* nil)
+;(defparameter *inp* "input_test.txt")
+(defparameter *inp* "input.txt")
 
 (defun read-input (fn &optional (trans #'identity))
   (with-open-file (f fn)
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
 
+(defun char-bit (chr)
+  (let ((chrmap (pairlis 
+                  '("F" "B" "L" "R") 
+                  '(#\0 #\1 #\0 #\1)))) 
+    (cdr (assoc chr chrmap :test #'string=))))
 
+(defun dec-row (seat) 
+  (parse-integer (coerce (mapcar #'char-bit (coerce (subseq seat 0 7) 'list)) 'string) :radix 2))
+
+(defun dec-column (seat) 
+  (parse-integer (coerce (mapcar #'char-bit (coerce (subseq seat 7 10) 'list)) 'string) :radix 2))
+
+(defun seat-to-id (seat) 
+  (let ((row (dec-row seat))
+        (column (dec-column seat)))
+    (+ (* row 8) column)))
+  
 ;; drivers
 ;;
 (defun part1 (fn)
-  (let* ((data (read-input fn))
+  (let* ((data (read-input fn #'seat-to-id))
          )
     (format t "Part 1~%")
+    (format t "max id: ~a~%" (apply #'max data))
 
 
     (when *debug*
@@ -40,12 +57,20 @@
     ))
 
 (defun part2 (fn)
-  (let* ((data (read-input fn))
+  (let* ((data (read-input fn #'seat-to-id))
+         (minid (apply #'min data))
+         (maxid (apply #'max data))
+         (allids (alexandria:iota (- maxid minid) :start minid))
+         (candidates (remove-if (lambda (x) (member x data)) allids))
          )
     (format t "Part 2~%")
+    (format t "Candidate(s): ~a~%" candidates)
 
     (when *debug*
       (format t "data ~a~%" data)
+      (format t "min ~a~%" minid)
+      (format t "max ~a~%" maxid)
+      (format t "cands ~a~%" candidates)
       )
     ))
 
