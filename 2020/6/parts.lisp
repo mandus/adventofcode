@@ -3,7 +3,6 @@
 ; run: sbcl --quit --load parts.lisp --eval '(aoc:run)'
 
 (ql:quickload :swank)
-(ql:quickload :alexandria)
 
 (uiop:define-package 
   :aoc
@@ -16,35 +15,84 @@
 
 (in-package :aoc)
 
-(defparameter *debug* t)
-(defparameter *inp* "input_test.txt")
-;(defparameter *inp* "input.txt")
+(defparameter *debug* nil)
+;(defparameter *inp* "input_test.txt")
+(defparameter *inp* "input.txt")
 
 (defun read-input (fn &optional (trans #'identity))
   (with-open-file (f fn)
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
 
-  
+(defun empty-line (line)
+  (= 0 (length line)))
+ 
+(defun data-to-groups (data fn)
+  (loop for line in data
+        for group = (funcall fn group line)
+        for groups = nil then groups
+        if (empty-line line)
+        do (progn
+             (setf groups (cons group groups))
+             (setf group nil))
+        finally (return (cons group groups)))) 
+
+(defun upd-quiz (l line)
+  (mapcar (lambda (x) (pushnew x l)) (coerce line 'list)) 
+  l)  
+
+(defun cons-if-line (gr l) 
+  (when *debug*
+    (format t "l: ~a, gr: ~a~%" l gr))
+  (if (empty-line l)
+      gr
+      (cons l gr)))
+
+
+(defun quiz-intersection (lst line)
+  (when *debug* 
+    (format t "~a - ~a~%" lst line))
+  (let ((ll (coerce line 'list))) 
+    (if lst
+      (intersection lst ll :test #'string=) 
+      ll))) 
+
+(defun reduce-group (gr &optional acc notfirst)
+  (if (and notfirst (not acc)) 
+      nil ; acc is empty but not first - result must be nil
+      (if (not (cdr gr)) ; last entry
+          (quiz-intersection acc (car gr))
+          (reduce-group (cdr gr) (quiz-intersection acc (car gr)) t))))
+
 ;; drivers
 ;;
 (defun part1 (fn)
   (let* ((data (read-input fn))
+         (groups (data-to-groups data #'upd-quiz))
+         (grouptrace (reduce #'+ (mapcar #'length groups)))
          )
     (format t "Part 1~%")
+    (format t "group counts ~a~%" grouptrace)
 
     (when *debug*
       (format t "data: ~a~%" data)
+      (format t "groups ~a~%" groups)
+      (format t "groups ~a~%" grouptrace)
       ) 
     ))
 
 (defun part2 (fn)
   (let* ((data (read-input fn))
+         (groups (data-to-groups data #'cons-if-line))
+         (grouptrace (reduce #'+ (mapcar #'length (mapcar #'reduce-group groups))))
          )
     (format t "Part 2~%")
+    (format t "group counts ~a~%" grouptrace)
 
     (when *debug*
       (format t "data ~a~%" data)
+      (format t "groups ~a~%" groups)
+      (format t "grouptrace ~a~%" grouptrace)
       )
     ))
 
