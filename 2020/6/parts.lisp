@@ -16,13 +16,14 @@
 (in-package :aoc)
 
 (defparameter *debug* nil)
-;(defparameter *inp* "input_test.txt")
-(defparameter *inp* "input.txt")
+(defparameter *inp* "input_test.txt")
+;(defparameter *inp* "input.txt")
 
 (defun read-input (fn &optional (trans #'identity))
   (with-open-file (f fn)
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
+
 
 (defun empty-line (line)
   (= 0 (length line)))
@@ -99,3 +100,15 @@
 (defun run ()
   (part1 *inp*)
   (part2 *inp*))
+
+; gather paragraphs more easy
+;  - taken from reddit; I need to learn curry/compose - good stuff!
+(ql:quickload :split-sequence)
+(ql:quickload :alexandria)
+(defparameter *file* (split-sequence:split-sequence "" (uiop:read-file-lines *inp*) :test #'equalp))
+(defparameter *data* (mapcar (lambda (list) (mapcar (lambda (string) (coerce string 'list)) list)) *file*))
+
+(defun count-responses (data set-operation)
+  (reduce #'+ (mapcar (alexandria:compose #'length (alexandria:curry  #'reduce set-operation)) data)))
+
+(mapcar (alexandria:curry #'count-responses *data*) (list #'union #'intersection))
