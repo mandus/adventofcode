@@ -38,15 +38,15 @@
       ((not more) nxtfound)
       (t (content-list more nxtfound)))))
 
-(defun add-contained (hash name content)
+(defun add-contained (bags name content)
   (let ((bag (car content))
         (nxtcontent (cddr content)))
     (when *debug* 
       (format t "~a is contained in ~a~%" bag name))
-    (setf (gethash bag hash) (cons name (gethash bag hash)))
+    (setf (gethash bag bags) (cons name (gethash bag bags)))
     (if nxtcontent 
-        (add-contained hash name nxtcontent)
-        hash)))
+        (add-contained bags name nxtcontent)
+        bags)))
 
 (defun hashdata (data) 
   (let  ((bags (make-hash-table :test #'equalp))
@@ -78,13 +78,14 @@
 
 (defun shiny-count (bags content)
   (let* ((bag (first content))
+         (bagcnt (gethash bag bags))
          (cnt (parse-integer (second content)))
          (morebags (cddr content)))
     (when *debug*
-      (format t "count ~a of ~a which contains ~a and more bags ~a~%" cnt bag (gethash bag bags) morebags))
+      (format t "count ~a of ~a which contains ~a and more bags ~a~%" cnt bag bagcnt morebags))
     (+ cnt 
-       (if (gethash bag bags)
-           (* cnt (shiny-count bags (gethash bag bags)))
+       (if bagcnt
+           (* cnt (shiny-count bags bagcnt))
            0)
        (if morebags
            (shiny-count bags morebags)
@@ -113,7 +114,7 @@
       (declare (ignorable contained))
       
       ; need to subtract the shiny gold bag as we only care about the content
-      (format t "Shiny gold bag count: ~a~%" (- (shiny-count bags '("shiny gold" "1")) 1)))
+      (format t "Shiny gold bag count: ~a~%" (shiny-count bags (gethash "shiny gold" bags))))
 
       (when *debug*
         (format t "data ~a~%" data))))
