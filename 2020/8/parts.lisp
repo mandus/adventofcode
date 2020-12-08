@@ -16,97 +16,79 @@
 
 (in-package :aoc)
 
-(defparameter *debug* t)
-(defparameter *inp* "input_test.txt")
-;(defparameter *inp* "input.txt")
+(defparameter *debug* nil)
+;(defparameter *inp* "input_test.txt")
+(defparameter *inp* "input.txt")
 
 (defun read-input (fn &optional (trans #'identity))
   (with-open-file (f fn)
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
 
+(defun dispatch ()
+  (let ((tbl (make-hash-table :test #'equalp)))
+    (setf (gethash "nop" tbl) (lambda (pos val reg) (values (1+ pos) reg)))
+    (setf (gethash "jmp" tbl) (lambda (pos val reg) (values (+ pos val) reg)))
+    (setf (gethash "acc" tbl) (lambda (pos val reg) (values (1+ pos) (+ reg val))))
+    tbl))
 
-(defun content-list (lst &optional (found nil))
-  (let* ((bag (car (cl-ppcre:split " bag" (string-trim " " (car lst)))))
-         (first-space (search " " bag))
-         (bag-count (subseq bag 0 first-space))
-         (bag-type (subseq bag  (1+ first-space)))
-         (nxtfound (append (list bag-type bag-count) found))
-         (more (cdr lst))
-         ) 
-    (cond
-      ((string= bag "no other") found)
-      ((not more) nxtfound)
-      (t (content-list more nxtfound)))))
+(defun mapop (op)
+  (cdr (assoc op (pairlis '("jmp" "nop") '("nop" "jmp")) :test #'string=)))
 
-(defun add-contained (bags name content)
-  (let ((bag (car content))
-        (nxtcontent (cddr content)))
-    (when *debug* 
-      (format t "~a is contained in ~a~%" bag name))
-    (setf (gethash bag bags) (cons name (gethash bag bags)))
-    (if nxtcontent 
-        (add-contained bags name nxtcontent)
-        bags)))
+(defun fix (op pos dofix fixhash)
+  (cond ((not dofix) (values op dofix))
+        ((string= "acc" op) (values op dofix))
+        ((gethash pos fixhash) (values op dofix))
+        (t (progn
+             (setf (gethash pos fixhash) t)
+             (values (mapop op) (not dofix))))))
 
-(defun hashdata (data) 
-  (let  ((bags (make-hash-table :test #'equalp))
-         (contained (make-hash-table :test #'equalp))
-         )
-  (dolist (line data) 
-    (let* ((bag (cl-ppcre:split " bags contain " line))
-           (name (car bag))
-           (content (content-list (cl-ppcre:split "," (cadr bag))))) 
-      (when *debug*
-        (format t "~a contains: ~a~%" name content))
-      (setf (gethash name bags) content)
-      (when content
-        (add-contained contained name content)))) 
-  (values bags contained)))
+(defun runops (instr &optional dofix fixhash)
+  (let ((mark (make-hash-table :test #'equalp))
+        (ops (dispatch)))
+    (labels ((loopit (pos accu dofix)
+               (setf (gethash pos mark) t)
+               (destructuring-bind (op data) (nth pos instr)
+                 (multiple-value-bind (op dofix) (fix op pos dofix fixhash)
+                  (multiple-value-bind (pos accu) (funcall (gethash op ops) pos data accu)
+                   (if (and (< pos (length instr))
+                            (not (gethash pos mark)))
+                       (loopit pos accu dofix)
+                       (values accu (>= pos (length instr)))))))))
+      (loopit 0 0 dofix))))
 
-(defun contain-shiny-gold (contained candidates &optional found)
-  (let (newcandidates) 
-    (dolist (bag candidates)
-      (dolist (check (gethash bag contained))
-        (when (not (member check found :test #'string=)) 
-          (pushnew check newcandidates :test #'string=)
-          (pushnew check found :test #'string=))
-        (when *debug*
-          (format t "check ~a: cands ~a, found ~a~%" check newcandidates found))))
-    (if newcandidates
-        (contain-shiny-gold contained newcandidates found)
-        found)))
-
-(defun shiny-count (bags content)
-  (let* ((bag (first content))
-         (bagcnt (gethash bag bags))
-         (cnt (parse-integer (second content)))
-         (morebags (cddr content)))
-    (when *debug*
-      (format t "count ~a of ~a which contains ~a and more bags ~a~%" cnt bag bagcnt morebags))
-    (+ cnt 
-       (if bagcnt
-           (* cnt (shiny-count bags bagcnt))
-           0)
-       (if morebags
-           (shiny-count bags morebags)
-           0))))
+(defun split (l)
+  (let ((sp (search " " l)))
+    (list (subseq l 0 sp) (parse-integer (subseq l (1+ sp))))))
 
 ;; drivers
 ;;
 (defun part1 (fn)
-  (let* ((data (read-input fn))
+  (let* ((data (read-input fn #'split))
          )
     (format t "Part 1~%")
+    (multiple-value-bind (accu end) (runops data)
+      (declare 
+        (ignore end))
+      (format t "Accu: ~a~%" accu))
 
-      (when *debug*
-        (format t "data: ~a~%" data)
-        )
-      ))
+    (when *debug*
+      (format t "data: ~a~%" data)
+      (format t "first: ~a~%" (car data))
+      )))
 
 (defun part2 (fn)
-  (let* ((data (read-input fn)))
-    (format t "Part 2~%")
+  (let* ((data (read-input fn #'split))
+         (fixhash (make-hash-table :test #'equalp)))
+    (labels ((loopit ()
+               (multiple-value-bind (accu end) (runops data t fixhash)
+                 (when *debug*
+                   (format t "accu: ~a, end ~a~%" accu end))
+                 (if end
+                     accu
+                     (loopit)))))
+     (format t "Part 2~%")
+     (format t "Accu: ~a~%" (loopit)))
 
     (when *debug*
       (format t "data ~a~%" data))))
