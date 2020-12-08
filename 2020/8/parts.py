@@ -94,7 +94,7 @@ def p2(i):
     print(f'part2-short: {a}')
 
 def s(fn):
-    with open(fn) as f: i=[[o,int(d),None] for (o,d) in [s.strip().split() for s in f.readlines()]]
+    i=[[o,int(d),None] for (o,d) in [s.split() for s in open(fn).read().strip().split('\n')]]
     p1([a[:] for a in i]) or p2(i)
 
 if __name__ == '__main__':
