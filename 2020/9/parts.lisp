@@ -3,7 +3,6 @@
 ; run: sbcl --quit --load parts.lisp --eval '(aoc:run)'
 
 (ql:quickload :swank)
-(ql:quickload :cl-ppcre)
 
 (uiop:define-package 
   :aoc
