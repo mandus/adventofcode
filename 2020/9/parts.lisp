@@ -64,11 +64,11 @@
                  (format t "data: ~a, candidates: ~a, sum: ~a, next: ~a~%" data lst lstsum next))
                (cond 
                  ((= num lstsum) lst)
-                 ((< num lstsum) nil)
+                 ((< num lstsum) (inner (push next data) (cdr lst))) ; now sliding window. Originally just nil here, throw away and start over
                  (t (inner data (append lst (list next))))
                  ))))
     (let ((inner-sum (inner data)))
-      (if (not inner-sum)
+      (if (not inner-sum) ; with sliding window, we should never get here.
         (search-contig num (rest data))
         inner-sum))))
 
