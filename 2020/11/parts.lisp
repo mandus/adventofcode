@@ -24,39 +24,22 @@
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
 
-(defun parse-line (line seats row &optional (col 0))
-  (let ((pos (car line))
-        (nxt (cdr line))
-        (seat (cons row col)))
-    (when *debug*
-      (format t "(~a,~a): ~a " row col pos))
-    (setf (gethash seat seats) pos)
-    (when nxt
-      (parse-line nxt seats row (1+ col)))))
+(defun parse (lst seats)
+  (loop for line in lst
+        for row = 0 then (1+ row)
+        do (loop for pos in (coerce line 'list)
+                 for col = 0 then (1+ col)
+                 for seat = (cons row col)
+                 do (setf (gethash (cons row col) seats) pos))))
 
-(defun parse (lst seats &optional (row 0))
-  (let ((line (car lst))
-        (nxt (cdr lst)))
-    (parse-line (coerce line 'list) seats row)
-    (when *debug* 
-      (format t "~%"))
-    (when nxt
-      (parse nxt seats (1+ row)))))
-
-(defun adjacents (seat seats) 
-  (declare
+(defun adj-seat (row col dx dy seats)
+  (declare 
     (ignore seats))
-  (let ((row (car seat))
-        (col (cdr seat)))
-    (loop for i from -1 to 1
-          append (loop for j from -1 to 1
-                   when (or (/= i 0) (/= j 0))
-                   collect (cons (+ row i) (+ col j))))))
+  (cons (+  row dx) (+ col dy)))
 
 (defun view-seat (row col dx dy seats)
   "find first non-floor position in grid in direction (dx,dy)"
-  (let* ((x (+ row dx))
-        (y (+ col dy))
+  (let* ((x (+ row dx)) (y (+ col dy))
         (seat (cons x y))
         (pos (gethash seat seats)))
     (when *debug* 
@@ -65,44 +48,44 @@
           ((string= pos ".") (view-seat x y dx dy seats))
           (t seat))))
 
-(defun adjacent-view (seat seats)
+(defun adjacents (seat seats fn)
   (let ((row (car seat))
         (col (cdr seat)))
     (loop for i from -1 to 1
           append (loop for j from -1 to 1
                        when (or (/= i 0) (/= j 0))
-                       collect (view-seat row col i j seats)))))
+                       collect (funcall fn row col i j seats)))))
 
-(defun all-empty (lst seats)
+(defun empty-p (lst seats)
   (let ((pos (gethash (car lst) seats))
         (nxt (cdr lst)))
    (if (or (not pos) (string= pos "L") (string= pos "."))
        (if nxt
-           (all-empty nxt seats)
+           (empty-p nxt seats)
            t)
        nil)))
 
-(defun four-occup (lst seats limit &optional (cnt 0))
+(defun occup-p (lst seats limit &optional (cnt 0))
   (let* ((pos (gethash (car lst) seats))
          (nxtcnt (if (string= pos "#") (1+ cnt) cnt))
          (nxt (cdr lst)))
     (cond 
       ((>= nxtcnt limit) t)
-      (nxt (four-occup nxt seats limit nxtcnt))
+      (nxt (occup-p nxt seats limit nxtcnt))
       (t (>= nxtcnt limit)))))
 
-(defun update-seat (seat seats limit adjfn)
+(defun update-seat (seat seats limit fn)
   (let ((pos (gethash seat seats)))
     (cond 
-      ((string= pos "L") (if (all-empty (funcall adjfn seat seats) seats) "#" "L"))
-      ((string= pos "#") (if (four-occup (funcall adjfn seat seats) seats limit) "L" "#"))
+      ((string= pos "L") (if (empty-p (adjacents seat seats fn) seats) "#" "L"))
+      ((string= pos "#") (if (occup-p (adjacents seat seats fn) seats limit) "L" "#"))
       (t "."))))
 
-(defun seat-updates (seats limit adjfn)
+(defun seat-updates (seats limit fn)
   (loop for seat being the hash-key
         using (hash-value pos) of seats
-        for newpos = (update-seat seat seats limit adjfn)
-        when (string/= pos newpos)
+        for newpos = (update-seat seat seats limit fn)
+        when (string/= pos newpos) 
         collect (cons seat newpos)))
 
 (defun update-seats (seats updates)
@@ -111,8 +94,8 @@
           (pos (cdr upd)))
       (setf (gethash seat seats) pos))))
 
-(defun simulate (seats limit adjfn)
-  (let ((updates (seat-updates seats limit adjfn)))
+(defun simulate (seats limit fn)
+  (let ((updates (seat-updates seats limit fn)))
     (when *debug*
       (format t "updates: ~a~%" updates))
     (dolist (upd updates)
@@ -120,12 +103,14 @@
             (pos (cdr upd)))
         (setf (gethash seat seats) pos)))
     (when updates
-      (simulate seats limit adjfn))))
+      (simulate seats limit fn))))
 
 (defun count-occup (seats)
   (loop for pos being the hash-value of seats
         count (string= pos "#")))
 
+;; debug helper
+;; 
 (defun print-seats (seats rows cols)
   (loop for i from 0 to (1- rows)
         do (progn
@@ -142,14 +127,11 @@
 
     (format t "Part 1~%")
     (parse data seats)
-    (simulate seats 4 #'adjacents)
+    (simulate seats 4 #'adj-seat)
     (format t "after simulation, ~a occupied~%" (count-occup seats))
 
     (when *debug*
       (format t "data: ~a~%" data)
-      (format t "(2,4) ~a~%" (gethash (cons 2 4) seats))
-      ;(format t "update: ~a~%" (update-seat (cons 2 4) seats))
-      ;(format t "occupied: ~a~%" (count-occup seats))
       )))
 
 (defun part2 (fn)
@@ -158,12 +140,12 @@
     
      (format t "Part 2~%")
      (parse data seats)
-     (simulate seats 5 #'adjacent-view)
+     (simulate seats 5 #'view-seat)
      (format t "after simulation, ~a occupied~%" (count-occup seats))
 
     (when *debug*
       (format t "data ~a~%" data)
-      (format t "adjacent-view (4,5): ~a ~%" (adjacent-view (cons 4 5) seats))
+      (format t "adjacent-view (4,5): ~a ~%" (adjacents (cons 4 5) seats #'view-seat))
       )))
 
 (defun run ()
