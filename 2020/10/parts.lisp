@@ -56,6 +56,29 @@
             (trav next (add-fact fact cnt) 1 cur)
             ))))
 
+(defun compways (val state &optional (cnt 0))
+  (let* ((cur (car state))
+         (nxtcnt (if (and cur (>= (+ 3 (car cur)) val)) (+ cnt (cdr cur)) cnt))
+         (nxt (cdr state)))
+    (if nxt
+        (compways val nxt nxtcnt)
+        (if (< 0 nxtcnt) nxtcnt 1))))
+
+; while the above works just fine, it's not totally generic. After looking at 
+; other ideas, the following simpler and more generic solution was found:
+(defun dp (lst &optional state)
+  ;state should be '((val . cnt) (val . cnt)), at most 3 prev. states. 
+  (let* ((val (car lst))
+         (next (cdr lst))
+         (ways (compways val state))
+         )
+    (if (<= (length state) 3) nil (pop state))
+    (when *debug*
+      (format t "val ~a, state ~a, ways ~a, [~a]~%" val state ways next))
+    (if next
+        (dp next (append state (list (cons val ways))))
+        ways)))
+
 ;; drivers
 ;;
 (defun part1 (fn)
@@ -83,6 +106,7 @@
     
      (format t "Part 2~%")
      (format t "result: ~a~%" (reduce #'* factors))
+     (format t "by dp:  ~a~%" (dp adapt))
 
 
     (when *debug*
