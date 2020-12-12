@@ -24,10 +24,11 @@
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
 
+;; general utils
+;;
 (defun parse (l)
   (cons (subseq l 0 1) (parse-integer (subseq l 1))))
-
-;; general utils
+ 
 (defun alist-val (lst key) 
   "return value in alist for given string key"
   (cdr (assoc key lst :test #'string=)))
@@ -35,6 +36,9 @@
 (defun in (val lst)
   "return member list of string value in list"
   (member val lst :test #'string=))
+
+(defun case-str (str)
+  (intern (string-upcase str)))
 
 ;; move in compass direction, pt is a complex
 (defun compass ()  
@@ -60,10 +64,10 @@
          (pwr (/ move 90))
          (ldir (* dir (expt (alist-val dirs "N") pwr)))
          (rdir (* dir (expt (alist-val dirs "S") pwr))))
-    (if (in instr '("N" "S" "E" "W" "F")) dir
-        (cond
-          ((string= instr "L") ldir)
-          ((string= instr "R") rdir)))))
+    (ecase (case-str instr)
+           ((N S E W F) dir)
+           (L ldir)
+           (R rdir))))
 
 ;; part 2
 
@@ -76,11 +80,11 @@
          (pwr (/ move 90))
          (ldir (* way (expt (alist-val dirs "N") pwr)))
          (rdir (* way (expt (alist-val dirs "S") pwr))))
-    (if (string= instr "F") way
-        (cond
-          ((in instr '("N" "S" "E" "W")) (movept way instr move))
-          ((string= instr "L") ldir)
-          ((string= instr "R") rdir)))))
+    (ecase (case-str instr)
+           (F way)
+           ((N S E W) (movept way instr move))
+           (L ldir)
+           (R rdir))))
 
 ;; simulation
 (defun upd (lst posfn dirfn dir &optional (pos (complex 0 0)))
