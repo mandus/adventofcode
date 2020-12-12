@@ -64,6 +64,9 @@
   (let* ((dirs (compass))) 
     (+ pt (* (alist-val dirs dir) len))))
 
+; manhattan (L1) norm of complex number
+(defun manhattan (pos)
+  (+ (abs (realpart pos)) (abs (imagpart pos))))
 
 ;; hash tools
 ;; 
