@@ -27,54 +27,82 @@
 (defun parse (l)
   (cons (subseq l 0 1) (parse-integer (subseq l 1))))
 
+;; general utils
+(defun alist-val (lst key) 
+  "return value in alist for given string key"
+  (cdr (assoc key lst :test #'string=)))
+
+(defun in (val lst)
+  "return member list of string value in list"
+  (member val lst :test #'string=))
+
+;; move in compass direction, pt is a complex
+(defun compass ()  
+  (list (cons "N" (complex 0 1)) 
+        (cons "S" (complex 0 -1))
+        (cons "E" (complex 1 0))
+        (cons "W" (complex -1 0))))
+
+(defun movept (pt dir len)
+  (let* ((dirs (compass))) 
+    (+ pt (* (alist-val dirs dir) len))))
+
+;; part 1
 (defun upd-pos (pos dir instr move)
-  (cond
-    ((member instr '("L" "R") :test #'string=) pos)
-    (t (cond
-         ((string= instr "N") (cons (car pos) (+ (cdr pos) move)))
-         ((string= instr "S") (cons (car pos) (- (cdr pos) move)))
-         ((string= instr "E") (cons (+ (car pos) move) (cdr pos)))
-         ((string= instr "W") (cons (- (car pos) move) (cdr pos)))
-         ((string= instr "F") (cons (+ (car pos) (* (car dir) move)) 
-                                    (+ (cdr pos) (* (cdr dir) move))))))))
+  (if (in instr '("L" "R")) 
+      pos
+      (cond
+        ((in instr '("N" "S" "E" "W")) (movept pos instr move))
+        ((string= instr "F") (+ pos (* dir move))))))
 
 (defun upd-dir (dir instr move)
-  (let* ((left (complex 0 1))
-         (right (complex 0 -1))
+  (let* ((dirs (compass))
          (pwr (/ move 90))
-         (cdir (complex (car dir) (cdr dir)))
-         (ldir (* cdir (expt left pwr)))
-         (rdir (* cdir (expt right pwr))))
+         (ldir (* dir (expt (alist-val dirs "N") pwr)))
+         (rdir (* dir (expt (alist-val dirs "S") pwr))))
+    (if (in instr '("N" "S" "E" "W" "F")) dir
+        (cond
+          ((string= instr "L") ldir)
+          ((string= instr "R") rdir)))))
 
-    (cond
-      ((member instr '("N" "S" "E" "W" "F") :test #'string=) dir)
-      (t (cond
-           ((string= instr "L") (cons (realpart ldir) (imagpart ldir)))
-           ((string= instr "R") (cons (realpart rdir) (imagpart rdir)))
-           (t nil)
-           )))))
+;; part 2
 
-(defun upd (lst &optional (pos (cons 0 0)) (dir (cons 1 0)))
+(defun move-pos (pos way instr move)
+  (if (string/= instr "F") pos
+      (+ pos (* way move))))
+
+(defun upd-way (way instr move)
+  (let* ((dirs (compass))
+         (pwr (/ move 90))
+         (ldir (* way (expt (alist-val dirs "N") pwr)))
+         (rdir (* way (expt (alist-val dirs "S") pwr))))
+    (if (string= instr "F") way
+        (cond
+          ((in instr '("N" "S" "E" "W")) (movept way instr move))
+          ((string= instr "L") ldir)
+          ((string= instr "R") rdir)))))
+
+;; simulation
+(defun upd (lst posfn dirfn dir &optional (pos (complex 0 0)))
  (let* ((upd (car lst))
         (instr (car upd))
         (move (cdr upd))
-        (nxtpos (upd-pos pos dir instr move))
-        (nxtdir (upd-dir dir instr move))
-        (nxt (cdr lst))
-        )
-   (if nxt
-       (upd nxt nxtpos nxtdir)
-       (values nxtpos nxtdir))))
+        (nxtpos (funcall posfn pos dir instr move))
+        (nxtdir (funcall dirfn dir instr move))
+        (nxt (cdr lst)))
+   (when *debug*
+     (format t "~a (~a): ~a|~a -> ~a (~a) ~%" pos dir instr move nxtpos nxtdir))
+   (if nxt (upd nxt posfn dirfn nxtdir nxtpos)
+       nxtpos)))
 
 (defun manhattan (pos)
-  (+ (abs (car pos)) (abs (cdr pos))))
+  (+ (abs (realpart pos)) (abs (imagpart pos))))
 
 ;; drivers
 ;;
 (defun part1 (fn)
   (let* ((data (read-input fn #'parse))
-         (end (upd data))
-         )
+         (end (upd data #'upd-pos #'upd-dir (complex 1 0))))
 
     (format t "Part 1~%")
     (format t "Manhattan: ~a~%" (manhattan end))
@@ -85,10 +113,11 @@
       )))
 
 (defun part2 (fn)
-  (let* ((data (read-input fn ))
-         )
+  (let* ((data (read-input fn #'parse))
+         (end (upd data #'move-pos #'upd-way (complex 10 1))))
     
      (format t "Part 2~%")
+     (format t "Manhattan: ~a~%" (manhattan end))
 
     (when *debug*
       (format t "data ~a~%" data)
