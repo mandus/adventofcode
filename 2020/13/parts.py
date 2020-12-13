@@ -26,6 +26,26 @@ def makefu(rid, r0, wait):
     return fu
 
 
+def offset(p0, p1, offset):
+    return findmul(p0, p1 % p0, offset)*p1-offset
+
+
+def reducer(lst):
+    r0 = lst[0]
+    p0 = r0[0]
+    newlst = []
+    for r in lst[1:]:
+        p = r[0]
+        off = r[1]
+        comb_p = np.lcm(p0, p)
+        comb_off = offset(p0, p, off)
+        newlst.append((comb_p, comb_off))
+    minoff = min([r[1] for r in newlst])
+    newlst = [int(r[0], r[1]-minoff) for r in newlst]
+    newlst.sort(key=lambda x: x[1])
+    return newlst
+
+
 def buildfu(rs):
     r0 = rs[0][0]
     fu = []
@@ -49,12 +69,13 @@ def find(fu):
                 mul[i] = mul[i]+1
                 val[i] = fu[i](mul[i])
         m = max(val)
-        done = len([v for v in val if v == m]) == 4
+        done = len([v for v in val if v == m]) == len(fu)
         if not cnt % 100000:
             print(cnt, mul, val)
         cnt += 1
     return mul, m
 
 
-fus = buildfu(routes)
-print(find(fus))
+if __name__ == '__main__':
+    fus = buildfu(routes)
+    print(find(fus))
