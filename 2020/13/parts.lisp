@@ -3,6 +3,7 @@
 ; run: sbcl --quit --load parts.lisp --eval '(aoc:run)'
 
 (ql:quickload :swank)
+(ql:quickload :cl-ppcre)
 
 (uiop:define-package 
   :aoc
@@ -15,7 +16,7 @@
 
 (in-package :aoc)
 
-(defparameter *debug* t)
+(defparameter *debug* nil)
 ;(defparameter *inp* "input_test.txt")
 (defparameter *inp* (if *debug* "input_test.txt" "input.txt"))
 
@@ -26,8 +27,13 @@
 
 ;; general utils
 ;;
+
+(defun parse-only-integer (val)
+  (handler-case (parse-integer val)
+    (t (c) (values nil c))))
+
 (defun parse (l)
-  (cons (subseq l 0 1) (parse-integer (subseq l 1))))
+  (remove nil (mapcar #'parse-only-integer (cl-ppcre:split "," l))))
  
 (defun alist-val (lst key) 
   "return value in alist for given string key"
@@ -40,16 +46,37 @@
 (defun case-str (str)
   (intern (string-upcase str)))
 
+
+(defun first-route (ts routes &optional id wait)
+  (let* ((route (car routes))
+        (nxt (cdr routes))
+        (routewait (- route (mod ts route)))
+        (nxtwait (if wait (min wait routewait) routewait))
+        (nxtid (cond ((not wait) route) ((< routewait wait) route) (t id)))
+        )
+    (if nxt
+        (first-route ts nxt nxtid nxtwait)
+        (values id wait))))
+
+(< 1 2)
+(mod 939 7)
+(min 7 8)
+
 ;; drivers
 ;;
 (defun part1 (fn)
   (let* ((data (read-input fn #'parse))
-         )
+         (ts (car (car data)))
+         (routes (car (cdr data))))
 
     (format t "Part 1~%")
+    (multiple-value-bind (id wait) (first-route ts routes)
+      (format t "answer: ~a~%" (* id wait)))
 
     (when *debug*
       (format t "data: ~a~%" data)
+      (format t "ts ~a~%" ts)
+      (format t "routes ~a~%" routes)
       )))
 
 (defun part2 (fn)
