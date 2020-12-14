@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import numpy as np
+from functools import reduce
 
 fn = 'input_test.txt'
 data = open(fn).read().strip().split('\n')
@@ -24,26 +25,6 @@ def makefu(rid, r0, wait):
     def fu(n):
         return n*lcm + mul
     return fu
-
-
-def offset(p0, p1, offset):
-    return findmul(p0, p1 % p0, offset)*p1-offset
-
-
-def reducer(lst):
-    r0 = lst[0]
-    p0 = r0[0]
-    newlst = []
-    for r in lst[1:]:
-        p = r[0]
-        off = r[1]
-        comb_p = np.lcm(p0, p)
-        comb_off = offset(p0, p, off)
-        newlst.append((comb_p, comb_off))
-    minoff = min([r[1] for r in newlst])
-    newlst = [int(r[0], r[1]-minoff) for r in newlst]
-    newlst.sort(key=lambda x: x[1])
-    return newlst
 
 
 def buildfu(rs):
@@ -76,6 +57,34 @@ def find(fu):
     return mul, m
 
 
+def chinese_reminder(n, a):
+    sum = 0
+    prod = reduce(lambda a, b: a*b, n)
+    for n_i, a_i in zip(n, a):
+        p = prod // n_i
+        sum += a_i * mul_inv(p, n_i) * p
+    return sum % prod
+
+
+def mul_inv(a, b):
+    b0 = b
+    x0, x1 = 0, 1
+    if b == 1:
+        return 1
+    while a > 1:
+        q = a // b
+        a, b = b, a % b
+        x0, x1 = x1 - q*x0, x0
+    if x1 < 0:
+        x1 += b0
+    return x1
+
+
 if __name__ == '__main__':
+    print(routes)
     fus = buildfu(routes)
     print(find(fus))
+
+    primes = [p[0] for p in routes]
+    rems = [-p[1] for p in routes]
+    print(chinese_reminder(primes, rems))

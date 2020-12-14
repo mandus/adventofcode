@@ -32,9 +32,12 @@
   (handler-case (parse-integer val)
     (t (c) (values nil c))))
 
-(defun parse (l)
+(defun parse-p1 (l)
   (remove nil (mapcar #'parse-only-integer (cl-ppcre:split "," l))))
- 
+
+(defun parse-p2 (l)
+  (mapcar #'parse-only-integer (cl-ppcre:split "," l)))
+
 (defun alist-val (lst key) 
   "return value in alist for given string key"
   (cdr (assoc key lst :test #'string=)))
@@ -58,14 +61,47 @@
         (first-route ts nxt nxtid nxtwait)
         (values id wait))))
 
-(< 1 2)
-(mod 939 7)
-(min 7 8)
+
+(defun enumerate-clean (lst)
+  (loop for i in lst
+       for j = 0 then (1- j) ; turn sign for chinese remainder func
+      when i collect (cons j i)))
+
+;; from rosetta code
+;;
+;; extended euclidean algorithm for gcd
+(defun egcd (a b)
+  (do ((r (cons b a) 
+          (cons (- (cdr r) (* (car r) q)) 
+                (car r)))
+       (s (cons 0 1) 
+          (cons (- (cdr s) (* (car s) q))
+                (car s)))
+       (u (cons 1 0) 
+          (cons (- (cdr u) (* (car u) q))
+                (car u)))
+       (q nil))
+     ((zerop (car r)) (values (cdr r) (cdr s) (cdr u)))
+     (setq q (floor (/ (cdr r) (car r))))))
+
+(defun invmod (a m)
+  (multiple-value-bind (r s k) (egcd a m)
+    (declare (ignore k))
+    (unless (= 1 r) (error "invmode: Values ~a and ~a are not coprimes." a m))
+    s))
+
+(defun chinese-reminder (am)
+  "am = '((a1 . m1) (a2 . m2)...) a's reminders, m's coprimes"
+  (loop for (a . m) in am
+        with mtot = (reduce #'* (mapcar #'(lambda (X) (cdr X)) am))
+        with sum = 0
+        finally (return (mod sum mtot))
+        do (incf sum (* a (invmod (/ mtot m) m) (/ mtot m)))))
 
 ;; drivers
 ;;
 (defun part1 (fn)
-  (let* ((data (read-input fn #'parse))
+  (let* ((data (read-input fn #'parse-p1))
          (ts (car (car data)))
          (routes (car (cdr data))))
 
@@ -80,13 +116,15 @@
       )))
 
 (defun part2 (fn)
-  (let* ((data (read-input fn #'parse))
-         )
+  (let* ((data (read-input fn #'parse-p2))
+         (factors (enumerate-clean (cadr data))))
     
      (format t "Part 2~%")
+     (format t "Answer: ~a~%" (chinese-reminder factors))
 
     (when *debug*
       (format t "data ~a~%" data)
+      (format t "factors ~a~%" (cdr factors))
       )))
 
 (defun run ()
