@@ -27,17 +27,17 @@
 (defun parse (l)
   (mapcar #'parse-integer (cl-ppcre:split "," l)))
 
-(defun enumerate-list (lst &optional (start 0))
+(defun enumerate-list (lst &key (start 0))
   (loop for i in lst
         for j = start then (1+ j) 
         collect (cons j i)))
 
-(defun read-out-input (data mem)
-  (let* ((vals (enumerate-list data 1))) 
+(defun mem-input (data mem)
+  (let* ((vals (enumerate-list data :start 1))) 
     (when *debug*
       (format t "enum-vals: ~a~%" vals))
     (dolist (val vals)
-      (setf (gethash (cdr val) mem ) (cons (car val) nil)))
+      (setf (gethash (cdr val) mem) `(,(car val))))
      (length data)))
 
 (defun take-turns-until (until turn spoken mem)
@@ -62,8 +62,8 @@
 ;;
 (defun part1 (fn &optional inpdata)
   (let* ((data (or inpdata (car (read-input fn #'parse))))
-         (mem (make-hash-table :test #'equalp))
-         (turn (read-out-input data mem))
+         (mem (make-hash-table))
+         (turn (mem-input data mem))
          (prev-spoken (elt data (1- turn))))
 
     (format t "Part 1~%")
@@ -75,8 +75,8 @@
 
 (defun part2 (fn &optional inpdata)
   (let* ((data (or inpdata (car (read-input fn #'parse))))
-         (mem (make-hash-table :test #'equalp))
-         (turn (read-out-input data mem))
+         (mem (make-hash-table))
+         (turn (mem-input data mem))
          (prev-spoken (elt data (1- turn)))
          (last-spoken (take-turns-until 30000000 turn prev-spoken mem)))
 
