@@ -70,9 +70,9 @@
 
 ; enumerate a list, remove nil (but still count for enumeration)
 
-(defun enumerate-clean (lst)
+(defun enumerate-clean (lst &optional (start 0))
   (loop for i in lst
-       for j = 0 then (1+ j) 
+       for j = start then (1+ j) 
       when i collect (cons j i)))
  
 
