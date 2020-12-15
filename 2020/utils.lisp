@@ -58,14 +58,21 @@
 (defun case-str (str)
   (intern (string-upcase str)))
 
-;; various loops
+;; some bit-tools
 
+; see aoc-2020-14 for sample use
+(defun dpb-pos (val pos &optional (bt 1))
+  "update bit-position pos in value with given bit (default 1)"
+  (dpb bt (byte 1 pos) val))
+
+
+;; various loops
 
 ; enumerate a list, remove nil (but still count for enumeration)
 
 (defun enumerate-clean (lst)
   (loop for i in lst
-       for j = 0 then (1+ j) ; turn sign for chinese remainder func
+       for j = 0 then (1+ j) 
       when i collect (cons j i)))
  
 
