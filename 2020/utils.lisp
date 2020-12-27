@@ -13,13 +13,13 @@
 
 (defun parse-only-integer (val)
   (handler-case (parse-integer val)
-    (t (c) (values nil c))))
+    (t (c) (values val c))))
 
 ; convert integers from string, remove not empty values
 (defun parse (l)
   (remove nil (mapcar #'parse-only-integer (cl-ppcre:split "," l))))
 
-; same as above, but leave nils
+; same as above, but leave non-numbers
 (defun parse (l)
   (mapcar #'parse-only-integer (cl-ppcre:split "," l)))
  
