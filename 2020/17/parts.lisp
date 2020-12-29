@@ -25,8 +25,6 @@
     (loop for line = (read-line f nil)
           while line collect (funcall trans line))))
 
-(append (list 1 3) '(0 0))
-
 (defun parse (lst mem &optional (extradim '(0)))
   (loop for line in lst
         for x = 0 then (1+ x)

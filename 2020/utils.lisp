@@ -13,13 +13,13 @@
 
 (defun parse-only-integer (val)
   (handler-case (parse-integer val)
-    (t (c) (values nil c))))
+    (t (c) (values val c))))
 
 ; convert integers from string, remove not empty values
 (defun parse (l)
   (remove nil (mapcar #'parse-only-integer (cl-ppcre:split "," l))))
 
-; same as above, but leave nils
+; same as above, but leave non-numbers
 (defun parse (l)
   (mapcar #'parse-only-integer (cl-ppcre:split "," l)))
  
@@ -74,7 +74,17 @@
   (loop for i in lst
        for j = start then (1+ j) 
       when i collect (cons j i)))
- 
+
+; max/min length of string in list of strings - using reduce trick with initial value
+
+(defun maxlen (strs)
+  (reduce #'(lambda (l str) (max l (length str))) strs :initial-value 0))
+
+(defun minlen (strs)
+  (reduce #'(lambda (l str) (min l (length str))) strs :initial-value (length (car strs))))
+
+
+
 
 ; example
 ; (ecase (case-str key) ; key is "FOO" or "BAR"
@@ -101,11 +111,20 @@
 ;; hash tools
 ;; 
 
-;; count str in hash values
+; count str in hash values
 
 (defun count-occup (h str)
   (loop for val being the hash-value of h
         count (string= val h)))
+
+; unique by hash keys
+
+(defun uniq-parts (p1 p2)
+  "use hash to find union of unique strings in to lists of strings"
+  (let ((phash (make-hash-table :test #'equalp)))
+    (dolist (p (append p1 p2))
+      (setf (gethash p phash) t))
+    (loop for key being the hash-key of phash collect key)))
 
 
 
