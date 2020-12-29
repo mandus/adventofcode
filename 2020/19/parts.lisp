@@ -137,7 +137,7 @@
 
     (format t "Part 1~%")
     (multiple-value-bind (a b) (parse-rules (car data) rules)
-      (let ((;parts (gen-parts "0" rules a b))
+      (let (;(parts (gen-parts "0" rules a b))
             (p42 (gen-parts "42" rules a b))
             (p31 (gen-parts "31" rules a b))) 
         ;(format t "Answer (take1: ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (in msg parts)) msgs)))
@@ -170,5 +170,4 @@
 
 (defun run ()
   (part1 *inp*)
-  (part2 *inp*)
-  )
+  (part2 *inp*))
