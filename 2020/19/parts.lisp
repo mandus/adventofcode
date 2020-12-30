@@ -39,32 +39,29 @@
          (spl (search ":" rule))
          (key (subseq rule 0 spl))
          (defs (mapcar #'split-space (mapcar #'trim-space (split-sequence:split-sequence #\| (subseq rule (+ 2 spl))))))
-        (nxt (cdr lst)))
+         (nxt (cdr lst)))
     ;(when *debug* (format t "~a [a: ~a, b: ~a] -> ~{ ~a ~}~%" key a b defs))
-    
+
     (cond 
-      ((and (= 1 (length (car defs))) (string= "\"a\"" (car (car defs)))) (setf a key))
-      ((and (= 1 (length (car defs))) (string= "\"b\"" (car (car defs)))) (setf b key))
+      ((and (= 1 (length (car defs))) (string= "\"a\"" (car (car defs)))) (progn (setf a key) (setf (gethash "a" h) key)))
+      ((and (= 1 (length (car defs))) (string= "\"b\"" (car (car defs)))) (progn (setf b key) (setf (gethash "b" h) key)))
       (t (setf (gethash key h) defs)))
 
     (if nxt
-      (parse-rules nxt h a b)
-      (values a b))))
+        (parse-rules nxt h a b)
+        (values a b))))
 
 
 ; take-1, generate all the strings. Works (slow though) for part1, does not work for part2
 
 (defun gen-rule (rule rules a b &optional (res `(())))
   (let ((r (car rule))
-        (nxt (cdr rule))
-        skip)
-    (if skip
-        nil
-        (if r (gen-rule nxt rules a b
-                        (mapcan #'(lambda (l)
-                                    (mapcar #'(lambda (r)
-                                                (append r l)) res)) (e-val r rules a b)))
-            res))))
+        (nxt (cdr rule)))
+    (if r (gen-rule nxt rules a b
+                    (mapcan #'(lambda (l)
+                                (mapcar #'(lambda (r)
+                                            (append r l)) res)) (e-val r rules a b)))
+        res)))
 
 (defun gen-rules (lst rules a b)
   (mapcan #'(lambda (r) (gen-rule r rules a b)) lst))
@@ -127,6 +124,63 @@
                            nil))))))
     (inner msg t)))
 
+;; 
+;; "DP" version, based on ideas from reddit solution-thread (much slower than the "hack" tuned for the problem, but more general)
+;; 
+
+(defun str-match (str m l r)
+  (string= str (subseq m l r)))
+
+(defun rule-is (r chr)
+  (string= r chr))
+
+(defun match-range (msg left right rule nxt rules DP &optional (split 1))
+  (let ((i (+ left split))) 
+
+    ; (when *debug*
+    ;   (format t "m-r: ~a [~a | ~a | ~a] ~a (~a)~%" msg left split right rule nxt))
+
+    (or (and (match-msg msg left i rule rules DP) (match-rule-msg msg i right nxt rules DP))
+        (and (< i right) (match-range msg left right rule nxt rules DP (1+ split))))))
+
+(defun match-rule-msg (msg left right rulelist rules DP)
+  (let* ((rule (car rulelist))
+         (nxt (cdr rulelist)))
+
+    ; (when *debug*
+    ;   (format t "m-r-m: -- [~a - ~a] ~a (~a)~%" left right rule nxt))
+
+    (cond 
+      ((and (= left right) (not rule)) t)
+      ((or (= left right) (not rule)) nil)
+      (t (match-range msg left right rule nxt rules DP)))))
+
+(defun match-rule-options-msg (msg left right options rules DP)
+  (let* ((opt (car options))
+         (nxt (cdr options))
+         (res (match-rule-msg msg left right opt rules DP)))
+
+    ; (when *debug*
+    ;   (format t "m-r-ops: ~a [~a - ~a] ~a = ~a (~a) ~%" msg left right opt res nxt))
+
+    (or res (and nxt (match-rule-options-msg msg left right nxt rules DP)))))
+
+(defun match-msg (msg left right rule rules DP)
+  (let* ((a (gethash "a" rules))
+         (b (gethash "b" rules))
+         (key (format nil "~a|~a|~a" left right rule)))
+    (multiple-value-bind (dpval haskey) (gethash key dp)
+
+      ; (when *debug*
+      ;   (when haskey
+      ;     (format t "m-m: DP lookup for ~a: ~a~%" key dpval)))
+
+      (if haskey dpval
+          (let ((res (or (and (rule-is rule a) (str-match "a" msg left right))
+                         (and (rule-is rule b) (str-match "b" msg left right))
+                         (match-rule-options-msg msg left right (gethash rule rules) rules DP))))
+            (setf (gethash key DP) res))))))
+
 ;; drivers
 ;;
 (defun part1 (fn &optional inpdata)
@@ -137,12 +191,12 @@
 
     (format t "Part 1~%")
     (multiple-value-bind (a b) (parse-rules (car data) rules)
-      (let (;(parts (gen-parts "0" rules a b))
+      (let ((parts (gen-parts "0" rules a b))
             (p42 (gen-parts "42" rules a b))
             (p31 (gen-parts "31" rules a b))) 
-        ;(format t "Answer (take1: ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (in msg parts)) msgs)))
+        (format t "Answer (take1): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (in msg parts)) msgs)))
         (format t "Answer (take2): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (verify msg p42 p31 #'p1-verify-parts)) msgs)))
-
+        (format t "Answer (take3): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (match-msg msg 0 (length msg) "0" rules (make-hash-table :test #'equalp))) msgs)))
 
         (when *debug*
           (format t "data: ~a~%" data)
@@ -157,10 +211,14 @@
     (format t "Part 2~%")
     (multiple-value-bind (a b) (parse-rules (car data) rules)
 
+      (setf (gethash "8" rules) '(("42") ("42" "8")))
+      (setf (gethash "11" rules) '(("42" "31") ("42" "11" "31")))
+
       (let ((p42 (gen-parts "42" rules a b))
             (p31 (gen-parts "31" rules a b)))
 
         (format t "Answer: ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (verify msg p42 p31 #'p2-verify-parts)) msgs)))
+        (format t "Answer (dp): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (match-msg msg 0 (length msg) "0" rules (make-hash-table :test #'equalp))) msgs)))
 
         (when *debug*
           (format t "data ~a~%" data)
