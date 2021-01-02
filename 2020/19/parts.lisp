@@ -194,9 +194,9 @@
       (let ((parts (gen-parts "0" rules a b))
             (p42 (gen-parts "42" rules a b))
             (p31 (gen-parts "31" rules a b))) 
-        (format t "Answer (take1): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (in msg parts)) msgs)))
-        (format t "Answer (take2): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (verify msg p42 p31 #'p1-verify-parts)) msgs)))
-        (format t "Answer (take3): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (match-msg msg 0 (length msg) "0" rules (make-hash-table :test #'equalp))) msgs)))
+        (format t "Answer (take1): ~a~%" (count-if (lambda (msg) (in msg parts)) msgs))
+        (format t "Answer (take2): ~a~%" (count-if (lambda (msg) (verify msg p42 p31 #'p1-verify-parts)) msgs))
+        (format t "Answer (take3): ~a~%" (count-if (lambda (msg) (match-msg msg 0 (length msg) "0" rules (make-hash-table :test #'equalp))) msgs))
 
         (when *debug*
           (format t "data: ~a~%" data)
@@ -217,8 +217,8 @@
       (let ((p42 (gen-parts "42" rules a b))
             (p31 (gen-parts "31" rules a b)))
 
-        (format t "Answer: ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (verify msg p42 p31 #'p2-verify-parts)) msgs)))
-        (format t "Answer (dp): ~a~%" (count-if #'identity (mapcar #'(lambda (msg) (match-msg msg 0 (length msg) "0" rules (make-hash-table :test #'equalp))) msgs)))
+        (format t "Answer: ~a~%" (count-if (lambda (msg) (verify msg p42 p31 #'p2-verify-parts)) msgs))
+        (format t "Answer (dp): ~a~%" (count-if (lambda (msg) (match-msg msg 0 (length msg) "0" rules (make-hash-table :test #'equalp))) msgs))
 
         (when *debug*
           (format t "data ~a~%" data)
