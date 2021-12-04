@@ -2,8 +2,10 @@
 
 nums = [int(line) for line in open('input.txt', 'r')]
 
-part1 = sum([y - x > 0 for x, y in zip(nums[:-1], nums[1:])])
-print(f'part1: {part1}')
 
-part2 = sum([y - x > 0 for x, y in zip(nums[:-3], nums[3:])])
-print(f'part2: {part2}')
+def solve(d, skp):
+    return sum([y - x > 0 for x, y in zip(d[:-skp], d[skp:])])
+
+
+print('part1: ', solve(nums, 1))
+print('part2: ', solve(nums, 3))
