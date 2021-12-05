@@ -75,6 +75,11 @@
        for j = start then (1+ j) 
       when i collect (cons j i)))
 
+; convert binary list to decimal
+
+(defun bin-to-dec (lst)
+  (loop for xp = 1 then (* 2 xp) for elt in (reverse lst) summing (* elt xp)))
+
 ; max/min length of string in list of strings - using reduce trick with initial value
 
 (defun maxlen (strs)
