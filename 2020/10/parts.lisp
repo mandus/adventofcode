@@ -31,7 +31,10 @@
          )
     (when *debug*
       (format t "~a - ~a = ~a; [~a] ~a~%" next prev diff nxtlst diffs))
-    (setf (gethash diff diffs) (1+ (gethash diff diffs 0)))
+    ;; orignal version:
+    ;(setf (gethash diff diffs) (1+ (gethash diff diffs 0)))
+    ;; it's possible to increment directly on a hash reference.
+    (incf (gethash diff diffs 0))
     (when nxtlst (reducediff nxtlst diffs next))))
 
 (defun add-fact (fact cnt)
