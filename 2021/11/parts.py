@@ -51,21 +51,22 @@ def resetflash(d, r, c):
     return d, cnt
 
 
+def oneround(d, r, c):
+    d = flash(step(d, r, c), r, c)
+    return resetflash(d, r, c)
+
+
 flashcount = 0
-for _ in range(100):
-    data = step(data, rows, cols)
-    data = flash(data, rows, cols)
-    data, cnt = resetflash(data, rows, cols)
-    flashcount += cnt
-
-print('part 1: ', flashcount)
-
+stepcnt = 0
 superflash = False
-stepcnt = 100
 while not superflash:
-    data = step(data, rows, cols)
-    data = flash(data, rows, cols)
-    data, cnt = resetflash(data, rows, cols)
+    data, cnt = oneround(data, rows, cols)
+    flashcount += cnt
     stepcnt += 1
+
+    if stepcnt == 100:
+        print('part 1: ', flashcount)
+
     superflash = cnt == rows*cols
+
 print('part2: ', stepcnt)
