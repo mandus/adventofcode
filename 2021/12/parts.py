@@ -35,9 +35,9 @@ def visitcave(cavemap: dict, cave: str, paths: list, path: list, allow_lower_onc
             continue
         if nxt in path and is_lower(nxt):
             if allow_lower_once and no_lower_dupe(path):
-                paths = visitcave(cavemap, nxt, paths, [c for c in path], allow_lower_once)
+                paths = visitcave(cavemap, nxt, paths, list(path), allow_lower_once)
             continue
-        paths = visitcave(cavemap, nxt, paths, [c for c in path], allow_lower_once)
+        paths = visitcave(cavemap, nxt, paths, list(path), allow_lower_once)
     return paths
 
 
