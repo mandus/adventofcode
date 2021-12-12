@@ -16,8 +16,10 @@ def no_lower_dupe(path: list) -> bool:
 def map_data(data: list) -> dict:
     cs_map = {}
     for start, end in data:
-        cs_map[start] = cs_map.get(start, []) + [end]
-        cs_map[end] = cs_map.get(end, []) + [start]
+        if end != 'start':
+            cs_map[start] = cs_map.get(start, []) + [end]
+        if end != 'end':
+            cs_map[end] = cs_map.get(end, []) + [start]
     return cs_map
 
 
