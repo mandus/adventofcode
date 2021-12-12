@@ -8,12 +8,8 @@ def is_lower(cave: str) -> bool:
     return cave.lower() == cave
 
 
-def lower_caves(path: list) -> list:
-    return list(filter(is_lower, path))
-
-
 def no_lower_dupe(path: list) -> bool:
-    l_c = lower_caves(path)
+    l_c = list(filter(is_lower, path))
     return len(set(l_c)) == len(l_c)
 
 
