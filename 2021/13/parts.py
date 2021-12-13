@@ -3,11 +3,9 @@
 # fn = 'test_input.txt'
 fn = 'input.txt'
 
-dots, folds = open(fn).read().strip().split('\n\n')
 
-
-def dotcoors(d: list) -> list:
-    return [tuple(map(int, c.split(','))) for c in d.split()]
+def dotcoors(d: list) -> set:
+    return set(tuple(map(int, c.split(','))) for c in d.split())
 
 
 def foldcoord(fl: list) -> tuple:
@@ -21,21 +19,11 @@ def parsefolds(f: list) -> list:
     return [foldcoord(t[tl:].split('=')) for t in f.split('\n')]
 
 
-def fold(d: list, f: tuple) -> list:
+def fold(d:  set, f: tuple) -> set:
     fx, fy = f
     if fx != 0:
-        return list(set([(fx-(dot[0]-fx), dot[1]) if dot[0] > fx else dot for dot in d]))
-    return list(set([(dot[0], fy-(dot[1]-fy)) if dot[1] > fy else dot for dot in d]))
-
-
-print('part1', len(fold(dotcoors(dots), parsefolds(folds)[0])))
-
-
-dots = dotcoors(dots)
-folds = parsefolds(folds)
-
-for f in folds:
-    dots = fold(dots, f)
+        return set([(fx-(dot[0]-fx), dot[1]) if dot[0] > fx else dot for dot in d])
+    return set([(dot[0], fy-(dot[1]-fy)) if dot[1] > fy else dot for dot in d])
 
 
 def printdots(d: list) -> None:
@@ -52,6 +40,17 @@ def printdots(d: list) -> None:
                 chrs.append(' ')
         pic.append(''.join(chrs))
     [print(p) for p in pic]
+
+
+dots, folds = open(fn).read().strip().split('\n\n')
+dots = dotcoors(dots)
+folds = parsefolds(folds)
+
+print('part1', len(fold(dots, folds[0])))
+
+
+for f in folds:
+    dots = fold(dots, f)
 
 
 print('part2')
