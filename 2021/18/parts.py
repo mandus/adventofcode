@@ -129,8 +129,8 @@ data = list(map(tokens, [li.strip() for li in open(fn).readlines()]))
 print('part1 ', magnitude(tokenlst(reduce(add, data))))
 
 high = 0
-for a in data:
-    for b in data:
+for i, a in enumerate(data):
+    for b in data[i:]:
         high = max(high, magnitude(tokenlst(add(a, b))))
         high = max(high, magnitude(tokenlst(add(b, a))))
 
