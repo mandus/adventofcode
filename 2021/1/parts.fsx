@@ -15,6 +15,7 @@ module aoc =
             match vs with
             | v::[] -> acc
             | v::vs -> if v < vs[0] then loop vs (acc + 1) else loop vs acc
+            | _ -> acc // unreachable
         loop vs 0
 
     let countdeeper vs = 
@@ -24,7 +25,7 @@ module aoc =
                 if vs.Length < 3 then acc
                 else
                     if v < vs[2] then loop vs (acc + 1) else loop vs acc
-            | _ -> acc
+            | _ -> acc  // unreachable
         loop vs 0
 
     let depth1 = parsedVals |> Array.toList |> countdept
