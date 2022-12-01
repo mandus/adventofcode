@@ -1,52 +1,59 @@
-; AoC 2020 - Åsmund Ødegård
+; AoC 2022 - Åsmund Ødegård
 ;
-; run: sbcl --load parts.lisp
+; run: sbcl --quit --load parts.lisp --eval '(aoc:run)'
 
-(ql:quickload :swank)
-(ql:quickload :cl-ppcre)
+;(ql:quickload :swank)
+(ql:quickload :split-sequence)
 
 (uiop:define-package 
   :aoc
   (:use :cl)
-  (:export :run)
-  )
+  (:export :run))
 
-(unless swank::*connections* 
-  (swank:create-server :port 4005 :dont-close t))
+; (unless swank::*connections* 
+;   (swank:create-server :port 4005 :dont-close t))
 
 (in-package :aoc)
 
-;(defparameter *debug* nil)
-(defparameter *debug* t)
+(defparameter *debug* nil)
+;(defparameter *debug* t)
 
-(defparameter *inp* "test_input.txt")
-;(defparameter *inp* "input.txt")
+;(defparameter *inp* "test_input.txt")
+(defparameter *inp* "input.txt")
 
-(defun read-input (fn &optional (trans #'identity))
-  (with-open-file (f fn)
-    (loop for line = (read-line f nil)
-          while line collect (funcall trans line))))
+(defun read-by-para (fn &optional (split "") (trans #'identity))
+  (mapcar trans (split-sequence:split-sequence split (uiop:read-file-lines fn) :test #'equalp)))
 
-(defun solve (l)
-  l)
+(defun split-lines (data)
+  (when *debug*
+    (format t " - ~a ~%" data))
+  (mapcan (lambda (line) (split-sequence:split-sequence #\Newline line)) data))
+
+
+(defun solve (data)
+  (sort (loop for l in data
+              collect (loop for num in l
+                            summing (parse-integer num))) '>))
 
 ;; drivers
 ;;
 (defun part1 (fn)
-  (let* ((items (read-input fn #'parse-integer)))
+  (let* ((items (read-by-para fn "" #'split-lines)))
     (format t "Part 1~%")
-    (format t "~a~%" (solve items))
+    (format t "~a~%" (first (solve items)))
 
     (when *debug*
       (format t "~a~%" items)) ))
 
 (defun part2 (fn)
-  (let* ((items (read-input fn #'parse-integer)))
+  (let* ((items (read-by-para fn "" #'split-lines))
+         (agglist (solve items))
+         (vals (subseq agglist 0 3)))
     (format t "Part 2~%")
-    (format t "~a~%" (solve items))
+    (format t "~a~%" (reduce '+ vals))
 
     (when *debug*
-      (format t "checks: ~a~%" items))))
+      (format t "checks: ~a~%" vals))))
 
 (defun run ()
   (part1 *inp*)
