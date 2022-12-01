@@ -10,3 +10,9 @@ l[*>l]  / sort index of l descending, take first, and look up in l
 l:(+/.')'(1_'(&~#'d)_d)
 l[*>l]
 +/l[3#>l]
+
+/ Tip from reddit-commenter: Use cast to int over list ('`I$) instead of eval - saves the parenthesis
+l:+/'`I$'(1_'(&~#'d)_d)
+l[*>l]
++/l[3#>l]
+
