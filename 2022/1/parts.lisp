@@ -31,9 +31,8 @@
 
 
 (defun solve (data)
-  (sort (loop for l in data
-              collect (loop for num in l
-                            summing (parse-integer num))) '>))
+  (sort (loop for l in data collect 
+              (loop for num in l summing (parse-integer num))) '>))
 
 ;; drivers
 ;;
