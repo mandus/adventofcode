@@ -14,6 +14,7 @@ module aoc =
         (58 + (int c-96)) % 58
 
     let prio1 acc (line:string) =
+        // There is "Array.splitInto 2" that will do exactly this...
         let half = line.Length / 2
         let left, right  = Set(line[..half-1]), Set(line[half..])
         let lprio = Set.intersect left right |> Set.toList
@@ -25,6 +26,7 @@ module aoc =
         chrval lprio[0]
 
     let gathertriple vs =
+        // There is "Array.chunkBySize 3" that will do what I need here...
         let rec loop vs acc = 
             match vs with
             | x::y::z::vs ->
@@ -34,4 +36,3 @@ module aoc =
 
     printfn "p1: %d" (calc prio1 data)
     printfn "p2: %d" (gathertriple (data |> Array.toList))
-    
