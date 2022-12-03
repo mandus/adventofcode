@@ -1,7 +1,7 @@
 #!/usr/bin/env k
 d:0:"input.txt"
 / split in halfs for part 1
-sp:{(0;`i$0.5*#x)_x}'d
+sp:{2 0N#x}'d
 / group in 3 for part 2
 g:0N 3#d
 
