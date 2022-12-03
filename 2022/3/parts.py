@@ -7,9 +7,10 @@ d = open(fn).read().strip().split('\n')
 a = ord('a')
 A = ord('A')
 
-def half(l):
-    h = len(l)//2
-    return (set(l[:h]), set(l[h:]))
+
+def splhalf(line):
+    h = len(line)//2
+    return (set(line[:h]), set(line[h:]))
 
 
 def chrnum(c):
@@ -19,15 +20,17 @@ def chrnum(c):
     return cv - a + 1
 
 
-dh = [half(l) for l in d]
-both = [list(l.intersection(r))[0] for (l, r) in dh]
-print('part1 ', sum([chrnum(c) for c in both]))
+# dh = [splhalf(line) for line in d]
+# both = [set.intersection(*parts).pop() for parts in dh]
+# print('part1 ', sum([chrnum(c) for c in both]))
+#
+# take 2 >  no need for all those variables:
+print('part 1', sum(
+    [chrnum(set.intersection(*parts).pop()) for
+     parts in [splhalf(line) for line in d]]))
 
 
 # intersection, groups of 3
-prio = 0
-for i in range(len(d)//3):
-    b = 3*i
-    sub = d[b:b+3]
-    prio += chrnum(list(set.intersection(*map(set, sub)))[0])
-print('part2 ', prio)
+print('part2 ', sum(
+    [chrnum(set.intersection(*map(set, d[3*i:3*(i+1)])).pop())
+     for i in range(len(d)//3)]))
