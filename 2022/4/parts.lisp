@@ -70,7 +70,6 @@
          (r0 (first right)) (r1 (second right))
          (left-set (range l0 (1+ l1)))
          (right-set (range r0 (1+ r1))))
-
     (when *debug*
       (format t "~a  -- ~a -> [~a] [~a] ~%" left right left-set right-set))
 
@@ -89,7 +88,6 @@
 
 (defun part2 (fn)
   (let* ((items (read-input fn #'spl-char)))
-
     (format t "Part 2~%")
     (format t "~a~%" (count-if #'solve-p2 items))
 
