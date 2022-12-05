@@ -1,5 +1,5 @@
 #!/usr/bin/env k
-d:0:"input.txt"
+d:(,""),0:"test_input.txt"
 e:&~#'d / find the length of each field- some will be zero. Use not (~) to find the zeros (now 1) and use  where (&) to find these indecis
 n:1_'e_d / use the list e to cut (_) d at the empty fields (now first in each entry) and use 1_ over (') to drop 1 from each list, leaving only the numbers
 l:(+/.')'n / use . (eval) over (') each of the lists and then reduce with sum (+/), do this over each sublist in n
