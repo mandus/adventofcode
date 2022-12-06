@@ -4,12 +4,11 @@ fn = 'input.txt'
 
 d = open(fn).read().strip()
 
+
 def find_start(instr, win=4):
     pos = 0
-    s = set(instr[pos:pos+win])
-    while len(s) < win:
+    while len(set(instr[pos:pos+win])) < win:
         pos += 1
-        s = set(instr[pos:pos+win])
     return pos + win
 
 
