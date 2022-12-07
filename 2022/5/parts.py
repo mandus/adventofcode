@@ -3,16 +3,16 @@
 # fn = 'test_input.txt'
 fn = 'input.txt'
 
-d = open(fn).read() # .strip().split('\n')
+d = open(fn).read()
 stacks, rearr = d.split('\n\n')
 rearr = rearr.strip()
 
 
 def linepart(line):
     if len(line) >= 4:
-        return(line[:4], line[4:])
+        return (line[:4], line[4:])
     else:
-        return(line[:4], [])
+        return (line[:4], [])
 
 
 def st(sd):
@@ -31,7 +31,6 @@ def st(sd):
                 process = False
     return s
 
-ds = st(stacks.split('\n'))
 
 def p1(data, tasks):
     for task in tasks.split('\n'):
@@ -45,14 +44,6 @@ def p1(data, tasks):
             num -= 1
     return data
 
-ds = p1(ds, rearr)
-
-res = []
-for i in range(1, len(ds)+1):
-    res.append(ds[f'{i}'][-1][1])
-print("".join(res))
-
-ds = st(stacks.split('\n'))
 
 def p2(data, tasks):
     for task in tasks.split('\n'):
@@ -67,6 +58,17 @@ def p2(data, tasks):
             num -= 1
         data[to].extend(moveitems)
     return data
+
+
+ds = st(stacks.split('\n'))
+ds = p1(ds, rearr)
+
+res = []
+for i in range(1, len(ds)+1):
+    res.append(ds[f'{i}'][-1][1])
+print("".join(res))
+
+ds = st(stacks.split('\n'))
 
 ds = p2(ds, rearr)
 
