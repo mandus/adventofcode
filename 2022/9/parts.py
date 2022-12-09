@@ -9,6 +9,7 @@ data = [(x.split()[0], int(x.split()[1]))
 
 dirs = {'R': (1, 0), 'U': (0, -1), 'L': (-1, 0), 'D': (0, 1)}
 
+
 def move(x, d):
     return (x[0]+d[0], x[1]+d[1])
 
