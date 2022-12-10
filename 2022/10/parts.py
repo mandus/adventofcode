@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 fn = 'test2_input.txt'
-# fn = 'input.txt'
+fn = 'input.txt'
 
 
 def parse(x):
@@ -38,8 +38,8 @@ print(sum([x*strength(cycleslice(d, x)) for x in cycles]))
 
 def addpxl(crtp, img, lines):
     crtp += 1
-    if crtp == 40:
-        crtp = 0
+    crtp = crtp % 40
+    if not crtp:
         lines.append(list(img))
         img = []
     return (crtp, img)
