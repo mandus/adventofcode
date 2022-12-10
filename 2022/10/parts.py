@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# fn = 'test2_input.txt'
-fn = 'input.txt'
+fn = 'test2_input.txt'
+# fn = 'input.txt'
 
 
 def parse(x):
@@ -19,8 +19,8 @@ def cyclecount(d):
 def cycleslice(d, num):
     i = num//2
     cnt = cyclecount(d[0:i])
-    while cnt < (num-1):
-        i += (num - cnt)//2
+    while cnt < (num-2):
+        i += (num - cnt - 1)//2
         cnt = cyclecount(d[0:i])
     return d[0:i]
 
@@ -54,20 +54,20 @@ for o in d:
     if o[0] == 'noop':
         c += 1
         if abs(crtp-x) <= 1:
-            img.append('#')
+            img.append('▊')
         else:
-            img.append('.')
+            img.append(' ')
         crtp, img = addpxl(crtp, img, lines)
     else:
         if abs(crtp-x) <= 1:
-            img.append('#')
+            img.append('▊')
         else:
-            img.append('.')
+            img.append(' ')
         crtp, img = addpxl(crtp, img, lines)
         if abs(crtp-x) <= 1:
-            img.append('#')
+            img.append('▊')
         else:
-            img.append('.')
+            img.append(' ')
         crtp, img = addpxl(crtp, img, lines)
         c += 2
         x += o[1]
