@@ -63,11 +63,7 @@ def distance(d, p, end):
 
 
         if t in visited:
-            if visited[t] > dist:
-                dist = min(dist, visited[t])
-            else:
-                # Do not consider a node visited before with already lower cost
-                continue
+            continue
 
         visited[t] = dist
 
@@ -75,7 +71,7 @@ def distance(d, p, end):
             visited[end] = min(dist+1, visited.get(end, maxcost))
         else:
             for c in reach(d, t, cands):
-                if c not in visited or visited[c] > dist+1:
+                if c not in visited:
                     queue.insert(0, (c, dist+1))
 
     return visited.get(end, False)
