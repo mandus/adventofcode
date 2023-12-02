@@ -15,4 +15,4 @@ m:{u/b,(s'x)}'gs /max; fold updater over base and grabs for each game
 +/1+&c'm / check goal for all max. Need 1+ since we're zero-indexed
 
 `1:"part2: "
-+/{*/.x}'m /just multiply each max and add up
++/*/'m /just multiply each max and add up
