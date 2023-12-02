@@ -2,7 +2,7 @@
 d:0:"input.txt"
 
 b:`red`green`blue!0 0 0 /set init state
-g:`red`green`blue!12 13 14 /goal
+g:(!b)!12 13 14 /goal
 
 s:{dr:" "\'", "\x;(`$'*'|'dr)!.'*'dr} /split game into grabs
 u:{(!x)!x[!x]|y[!x]} /update map

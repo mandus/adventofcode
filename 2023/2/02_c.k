@@ -1,7 +1,7 @@
 #!/usr/bin/env k
 d:0:"input.txt"
 b:`red`green`blue!0 0 0
-g:`red`green`blue!12 13 14
+g:(!b)!12 13 14
 s:{dr:" "\'", "\x;(`$'*'|'dr)!.'*'dr}
 u:{(!x)!x[!x]|y[!x]}
 m:{u/b,(s'x)}'"; "\'*'": "\'*'|'": "\'d
