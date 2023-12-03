@@ -1,70 +1,45 @@
 #!/usr/bin/env python3
 
+import itertools as it
+
 fn = 't1.txt'
 fn = 'input.txt'
-d = open(fn).read().strip().split('\n')
-
-# idea: for each number, store coord digits as a list; (2,1), (2,2), (2,3)
-# for symbols (not digit, not dot), store both coord and adjacents; e.g. (4,4)
-# as well as (3,3), (3,4), (3,5), (4,3), (4,5), (5,3), (5,4), (5,5)
-#
-# when I have all these lists, and I can for each digit check if there is an
-# intersection with one of the symbols-coordlists; if so it's a part
 
 
-def isdig(c: str) -> bool:
-    return c in '0123456789'
-
-
-def isdot(c: str) -> bool:
-    return c == '.'
-
-
-def isstar(c: str) -> bool:
+def isstar(c: chr) -> bool:
     return c == '*'
+
+
+def issymb(c: chr) -> bool:
+    return not c.isdigit() and not c == '.'
 
 
 def adjc(i: int, j: int) -> set:
     return [(x, y) for x in range(i-1, i+2) for y in range(j-1, j+2)]
 
 
-def p_l(l: str, i: int) -> (list, list, list):
-    """parse line for row i"""
-    numbers = []
-    symbols = []
-    stars = []
-    in_num = False
-    num = ''
-    num_coor = []
-    for j, c in enumerate(l):
-        if isdig(c):
-            num += c
-            num_coor.append((i, j))
-            if not in_num:
-                in_num = True
-        elif isdot(c):
-            if in_num:
-                # finish number:
-                in_num = False
-                numbers.append((int(num), set(num_coor)))
-                num = ''
-                num_coor = []
-        else:
-            # must be a symbol
-            a = adjc(i, j)
-            symbols.extend(a)
-            if in_num:
-                in_num = False
-                numbers.append((int(num), set(num_coor)))
-                num = ''
-                num_coor = []
-            if isstar(c):
-                stars.append(set(a))
-    if in_num:
-        # line ending with numbers
-        numbers.append((int(num), set(num_coor)))
+def group(t: list, i: int) -> list:
+    if not t:
+        return []
 
-    return numbers, symbols, stars
+    def upd(ts):
+        return int(''.join(x for x, _ in ts)), set([(i, y) for _, y in ts])
+
+    g = []
+    cur = []
+    for n, j in t:
+        if cur and j > cur[-1][1]+1:
+            g += [upd(cur)]
+            cur = []
+        cur.append((n, j))
+    return g + [upd(cur)]
+
+
+def p_l(line: str, i: int) -> (list, list, list):
+    nums = group([(c, j) for j, c in enumerate(line) if c.isdigit()], i)
+    symbs = list(it.chain.from_iterable([adjc(i, j) for j, c in enumerate(line) if issymb(c)]))
+    stars = [set(adjc(i, j)) for j, c in enumerate(line) if isstar(c)]
+    return nums, symbs, stars
 
 
 def parse(d: list) -> (list, list):
@@ -73,27 +48,16 @@ def parse(d: list) -> (list, list):
     stars = []
     for i, line in enumerate(d):
         n, s, st = p_l(line, i)
-        if n:
-            numbers.extend(n)
-        if s:
-            symbols.extend(s)
-        if st:
-            stars.extend(st)
+        numbers.extend(n)
+        symbols.extend(s)
+        stars.extend(st)
     return numbers, set(symbols), stars
 
 
-def is_part(n_c: set, s_c: set) -> bool:
-    return n_c.intersection(s_c)
-
-
+d = open(fn).read().strip().split('\n')
 nums, syms, stars = parse(d)
-parts = [n for n, c in nums if is_part(c, syms)]
+parts = [n for n, c in nums if c.intersection(syms)]
 print(f'part1: {sum(parts)}')
 
-gears = []
-for st in stars:
-    gc = [n for n, c in nums if is_part(c, st)]
-    if len(gc) == 2:
-        gears.append(gc[0]*gc[1])
-
+gears = [gn[0]*gn[1] for gn in [[n for n, c in nums if c.intersection(c, st)] for st in stars] if len(gn) == 2]
 print(f'part2: {sum(gears)}')
