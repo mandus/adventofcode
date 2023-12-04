@@ -16,7 +16,7 @@
 (defparameter *debug* t)
 (defparameter *debug* nil)
 
-(defparameter *inp* "test_input.txt")
+(defparameter *inp* "t1.txt")
 (defparameter *inp* "input.txt")
 
 (when *debug*
