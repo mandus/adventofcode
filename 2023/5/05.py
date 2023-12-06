@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 fn = 'input.txt'
-# fn = 't1.txt'
+fn = 't1.txt'
 d = open(fn).read().strip().split('\n\n')
 
 
@@ -41,7 +41,7 @@ def movepairs(p, d):
             if s > src+rln:
                 # rule exhausted
                 continue
-            if s <= src and s+ln > src:
+            if s < src and s+ln >= src:
                 dests.append((s, src-s))
                 delta = ln-src+s
                 dests.append((dest, min(rln, delta)))
@@ -49,7 +49,7 @@ def movepairs(p, d):
                     srcs.append((src+rln, delta-rln))
                 handled = True
                 break
-            elif s > src and s < src+rln:
+            elif s >= src and s < src+rln:
                 delta = s-src
                 dests.append((dest+delta, min(rln-delta, ln)))
                 if ln > rln-delta:
