@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 fn = 'input.txt'
-fn = 't1.txt'
+# fn = 't1.txt'
 d = open(fn).read().strip().split('\n\n')
 
 
@@ -28,10 +28,43 @@ def sec(s, d):
     return [m[i] for i in s]
 
 
-def movepair(p, d):
-    print('pair:', p)
-    d = [[int(y) for y in x.split()] for x in d.split('\n')[1:]]
-    print('rules:', d)
+def movepairs(p, d):
+    p.sort()
+    rs = [[int(y) for y in x.split()] for x in d.split('\n')[1:]]
+    rs = sorted(rs, key=lambda x: x[1])
+    srcs = list(reversed(p))
+    dests = []
+    while srcs:
+        s, ln = srcs.pop()
+        handled = False
+        for dest, src, rln in rs:
+            if s > src+rln:
+                # rule exhausted
+                continue
+            if s <= src and s+ln > src:
+                dests.append((s, src-s))
+                delta = ln-src+s
+                dests.append((dest, min(rln, delta)))
+                if delta > rln:
+                    srcs.append((src+rln, delta-rln))
+                handled = True
+                break
+            elif s > src and s < src+rln:
+                delta = s-src
+                dests.append((dest+delta, min(rln-delta, ln)))
+                if ln > rln-delta:
+                    srcs.append((src+rln, ln-rln+delta))
+                handled = True
+                break
+            elif src > s+ln:
+                # src >= s+ln -> no owerlap, and further rules are higher
+                dests.append((s, ln))
+                handled = True
+                break
+        # all rules exhausted; moving forward
+        if not handled:
+            dests.append((s, ln))
+    return dests
 
 
 s = i(d[0])
@@ -41,7 +74,6 @@ for p in d[1:]:
 print(f'part1: {min(s)}')
 
 pairs = i2(d[0])
-print(pairs)
-for p in pairs:
-    movepair(p, d[1:][0])
-# print(f'part2: {min()}')
+for p in d[1:]:
+    pairs = movepairs(pairs, p)
+print(f'part2: {pairs[0][0]}')
