@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 fn = 'input.txt'
-fn = 't1.txt'
+# fn = 't1.txt'
 d = open(fn).read().strip().split('\n\n')
 
 
@@ -36,15 +36,19 @@ def movepairs(p, d):
     dests = []
     while srcs:
         s, ln = srcs.pop()
+        if ln == 0:
+            # ignore zero-length ranges
+            continue
         handled = False
         for dest, src, rln in rs:
-            if s > src+rln:
+            if s >= src+rln:
                 # rule exhausted
                 continue
             if s < src and s+ln >= src:
                 dests.append((s, src-s))
                 delta = ln-src+s
-                dests.append((dest, min(rln, delta)))
+                if delta:
+                    dests.append((dest, min(rln, delta)))
                 if delta > rln:
                     srcs.append((src+rln, delta-rln))
                 handled = True
@@ -56,7 +60,7 @@ def movepairs(p, d):
                     srcs.append((src+rln, ln-rln+delta))
                 handled = True
                 break
-            elif src > s+ln:
+            elif src >= s+ln:
                 # src >= s+ln -> no owerlap, and further rules are higher
                 dests.append((s, ln))
                 handled = True
@@ -64,6 +68,7 @@ def movepairs(p, d):
         # all rules exhausted; moving forward
         if not handled:
             dests.append((s, ln))
+        srcs = list(reversed(srcs))
     return dests
 
 
@@ -76,4 +81,4 @@ print(f'part1: {min(s)}')
 pairs = i2(d[0])
 for p in d[1:]:
     pairs = movepairs(pairs, p)
-print(f'part2: {pairs[0][0]}')
+print(f'part2: {sorted(pairs)[0][0]}')
