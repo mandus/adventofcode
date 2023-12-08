@@ -27,48 +27,43 @@ def grp(s: str, joker=False) -> dict:
 
 def hand(m: dict) -> int:
     ln = len(m)
+    mv = sorted(m.values())
     if ln == 1:
         # 5 of a kind
         return 7
     if ln == 2:
         # 4 of a kind or full house
-        return 6 if sorted(m.values())[0] == 1 else 5
+        return mv[-1] + 2
     if ln == 3:
         # 3 of a kind or two pairs
-        return 4 if sorted(m.values())[-1] == 3 else 3
+        return mv[-1] + 1
     if ln == 4:
         # one pair
         return 2
     return 1
 
 
-def strth(x: str, y: str) -> int:
-    cards = "23456789TJQKA"
-    xh, yh = hand(grp(x[0])), hand(grp(y[0]))
-    if xh != yh:
-        return xh-yh
-    else:
-        for i, j in zip(x[0], y[0]):
-            if i == j:
-                continue
-            return cards.index(i) - cards.index(j)
+def cmpfu(c, j=False):
+    cards = str(c)
+    joker = j
+
+    def strth(x: str, y: str) -> int:
+        xh, yh = hand(grp(x[0], joker)), hand(grp(y[0], joker))
+        if xh != yh:
+            return xh-yh
+        else:
+            for i, j in zip(x[0], y[0]):
+                if i == j:
+                    continue
+                return cards.index(i) - cards.index(j)
+    return strth
 
 
-def strth2(x: str, y: str) -> int:
-    cards = "J23456789TQKA"
-    xh, yh = hand(grp(x[0], True)), hand(grp(y[0], True))
-    if xh != yh:
-        return xh-yh
-    else:
-        for i, j in zip(x[0], y[0]):
-            if i == j:
-                continue
-            return cards.index(i) - cards.index(j)
-
-
-rnk = sorted(d, key=ft.cmp_to_key(strth))
+cmp = cmpfu("23456789TJQKA")
+rnk = sorted(d, key=ft.cmp_to_key(cmp))
 print(f'part1: {sum([(i+1)*int(j[1]) for i, j in enumerate(rnk)])}')
 
 
-rnk2 = sorted(d, key=ft.cmp_to_key(strth2))
+cmp = cmpfu("J23456789TQKA", True)
+rnk2 = sorted(d, key=ft.cmp_to_key(cmp))
 print(f'part2: {sum([(i+1)*int(j[1]) for i, j in enumerate(rnk2)])}')
