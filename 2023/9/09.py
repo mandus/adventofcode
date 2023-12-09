@@ -18,3 +18,4 @@ def scan(ln):
 
 
 print(f'part1: {sum([scan(x) for x in d])}')
+print(f'part2: {sum([scan(list(reversed(x))) for x in d])}')
