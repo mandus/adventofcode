@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 
-
-def adjc(i: int, j: int) -> set:
-    return [(x, y) for x in range(i-1, i+2) for y in range(j-1, j+2) if 1 <= sum([abs(x), abs(y)])]
+import colorama as cl
 
 
 fn = 't1.txt'
-# fn = 'input.txt'
+fn = 't2.txt'
+fn = 't3.txt'
+fn = 'input.txt'
 x = open(fn).read().strip().split('\n')
 S = [e[0] for e in [[(j, i) for j, c in enumerate(r) if c == 'S'] for i, r in enumerate(x)] if e][0]
 
 
 #
 # I use (column, row) (aka (x, y)) - which mean look-up in data is x[row][column]
-
+#
 
 ps = {'|': ((0, -1), (0, 1)),
       '-': ((-1, 0), (1, 0)),
@@ -21,6 +21,10 @@ ps = {'|': ((0, -1), (0, 1)),
       'J': ((0, -1), (-1, 0)),
       '7': ((-1, 0), (0, 1)),
       'F': ((1, 0), (0, 1))}
+
+
+def adjc(i: int, j: int) -> set:
+    return [(x, y) for x in range(i-1, i+2) for y in range(j-1, j+2) if 1 <= sum([abs(x), abs(y)])]
 
 
 def comb(v, w):
@@ -71,13 +75,63 @@ def walk(S, x):
     pipe.append(go[0][1])
     return step+1, pipe
 
+
+def start_symb(S, x):
+    s_conn = [p[0][1] for p in start(S, x)]
+    for pipe in ps:
+        if all([s in s_conn for s in conn(S, pipe)]):
+            return pipe
+
+
+def insideout(S, x):
+    rpl = start_symb(S, x)
+    pipe = walk(S, x)[1]
+    c, r = shape(x)
+    inner = 0
+    for i in range(r):
+        ins = False
+        from_F = False
+        from_L = False
+        for j in range(c):
+            pos = (j, i)
+            prev = (j-1, i)
+
+            if pos == S:
+                s = rpl
+            else:
+                s = x[i][j]
+
+            in_pipe = pos in pipe
+            if pos in pipe and prev not in conn(pos, s):
+                ins = not ins
+                from_F = s == 'F'
+                from_L = s == 'L'
+            elif pos in pipe and prev in conn(pos, s):
+                if s == '7' and from_F:
+                    ins = not ins
+                    from_F = False
+                elif s == 'J' and from_F:
+                    from_F = False
+                elif s == 'J' and from_L:
+                    ins = not ins
+                    from_L = False
+                elif s == '7' and from_L:
+                    from_L = False
+
+            s = s if in_pipe else ('I' if ins else ' ')
+            if s == 'I':
+                inner += 1
+
+            if in_pipe:
+                use_col = cl.Fore.RED
+            elif ins:
+                use_col = cl.Fore.GREEN
+            else:
+                use_col = cl.Fore.RESET
+            print(use_col + s, end='')
+        print()
+    return inner
+
+
 print(f'part1: {walk(S, x)[0] // 2}')
-
-pipe = walk(S, x)[1]
-c, r = shape(x)
-for i in range(r):
-    for j in range(c):
-        s = x[i][j] if (j, i) in pipe else '.'
-        print(s, end=''),
-    print()
-
+print(f'part2: {insideout(S, x)}')
