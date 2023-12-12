@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
+import functools as ft
 
 fn = 't1.txt'
-# fn = 'input.txt'
+fn = 'input.txt'
 
 
 def upd_pat(pat, qs, upd):
@@ -39,8 +40,8 @@ def c_h(ln):
     return sum(1 for x in ln if x == '#')
 
 
+@ft.lru_cache
 def solve(pat, chk, cur=0):
-    #print(f'solve {pat} for {chk} with {cur}')
     cnt = 0
     f = pat[0]
     r = pat[1:]
@@ -51,16 +52,12 @@ def solve(pat, chk, cur=0):
     if not r:
         # exhausted;
         if f == '.' and cur and len(chk) == 1 and cur == chk[0]:
-            print(f' | return 1 for {f} with {cur} and {chk}')
             return 1
-        elif f == '.' and not chk and not cur:
-            print(f' - return 1 for {f} with {cur} and {chk}')
+        if f == '.' and not chk and not cur:
             return 1
-        elif f == '#' and len(chk) == 1 and chk[0] == cur+1:
-            print(f' > return 1 for {f}, {cur}, {chk[0]}')
+        if f == '#' and len(chk) == 1 and chk[0] == cur+1:
             return 1
-        elif f == '?' and ((len(chk) == 1 and chk[0] == cur+1) or (not chk and not cur)):
-            print(f' < return 1 for {f} with {cur} and {chk}')
+        if f == '?' and ((len(chk) == 1 and (chk[0] == cur or chk[0] == cur+1)) or (not chk and not cur)):
             return 1
         return 0
 
@@ -75,30 +72,34 @@ def solve(pat, chk, cur=0):
         cnt += solve(r, chk[1:], 0)
     elif f == '?':
         # pretend hash:
-        print(f' +++ from {cnt} {pat} - {chk} - {cur}')
-        cnt += solve(r, chk, cur+1)
-        print(f' via {cnt} {pat} and {chk}')
+        tmp = solve(r, chk, cur+1)
+        cnt += tmp
         # or pretend dot
         if cur and chk[0] == cur:
             cnt += solve(r, chk[1:], 0)
         elif not cur:
             cnt += solve(r, chk, 0)
-        print(f' got to {cnt} from {pat} and {chk}')
-    else:
-        print(f'  ///// unhandled {pat} {chk} {cur}')
 
-    print(f' >>> return {cnt} for {pat} and {chk} and {cur}')
     return cnt
 
 
 def cnts(ln):
     pat, chk = ln.split()
-    pat = [c for c in pat]
-    chk = [int(x) for x in chk.split(',')]
+    pat = tuple([c for c in pat])
+    chk = tuple([int(x) for x in chk.split(',')])
+    return solve(pat, chk)
+
+
+def cnts2(ln):
+    pat, chk = ln.split()
+    pat = '?'.join([pat for _ in range(5)])
+    chk = ','.join([chk for _ in range(5)])
+    pat = tuple([c for c in pat])
+    chk = tuple([int(x) for x in chk.split(',')])
     return solve(pat, chk)
 
 
 d = open(fn).read().strip().split('\n')
 
 print(f'part1: {sum([cnts(ln) for ln in d])}')
-print(f'part2: {2}')
+print(f'part2: {sum([cnts2(ln) for ln in d])}')
