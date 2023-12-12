@@ -6,40 +6,6 @@ fn = 't1.txt'
 fn = 'input.txt'
 
 
-def upd_pat(pat, qs, upd):
-    for i, c in enumerate(upd):
-        pat[qs[i]] = c
-    return pat
-
-
-def chk_pat(pat, chk):
-    pat = list(reversed(pat))
-    g = []
-    in_group = False
-    cnt = 0
-    while pat:
-        c = pat.pop()
-        if c == '.':
-            if in_group:
-                g.append(cnt)
-                gs = len(g)
-                if g != chk[0:gs]:
-                    return False
-                cnt = 0
-                in_group = False
-        elif c == '#':
-            cnt += 1
-            if not in_group:
-                in_group = True
-    if in_group:
-        g.append(cnt)
-    return g == chk
-
-
-def c_h(ln):
-    return sum(1 for x in ln if x == '#')
-
-
 @ft.lru_cache
 def solve(pat, chk, cur=0):
     cnt = 0
