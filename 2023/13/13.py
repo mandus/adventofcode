@@ -41,12 +41,23 @@ def mirrs(m):
     print(sorted([v for _, v in m.items()]))
 
 
-def refl(h):
+def smudge(m):
+    sgs = [k for k, v in m.items()]
+    for i, sv in enumerate(sgs):
+        for sw in sgs[1+i:]:
+            if sw in sv or sv in sw:
+                print('candidate: ', sv, sw)
+
+
+def refl(h, c_s=False):
+    # c_s: correct smudge
     v = list(map(list, zip(*h)))
     hm = m(h)
-    print(hm)
+    print('hm:', hm)
+    smudge(hm)
     vm = m(v)
-    print(vm)
+    print('vm:', vm)
+
     tst, st = mirrp(hm, len(h))
     if tst:
         return 100*st[1]
@@ -56,3 +67,4 @@ def refl(h):
 
 
 print(f'part1: {sum(refl(p) for p in d)}')
+print(f'part2: {sum(refl(p, True) for p in d)}')
