@@ -3,7 +3,7 @@
 import itertools as it
 
 fn = 't1.txt'
-# fn = 'input.txt'
+fn = 'input.txt'
 
 d = [x.split('\n') for x in open(fn).read().strip().split('\n\n')]
 
@@ -41,22 +41,67 @@ def mirrs(m):
     print(sorted([v for _, v in m.items()]))
 
 
-def smudge(m):
+def upd_m(m, v, w):
+    m_c = dict(m)
+    lv, lw = len(m_c[v]), len(m_c[w])
+
+    # TODO: If neither is 1, I need to loop over and try
+    # smudging one by one and see what works?
+    #
+    if not (lv == 1 or lw == 1):
+        return m, False
+
+    if lv > lw:
+        m_c[v] = sorted(list(m_c[v]) + m_c[w])
+        del m_c[w]
+    else:
+        m_c[w] = sorted(list(m_c[w]) + m_c[v])
+        del m_c[v]
+    return m_c, True
+
+
+def smudge(m, ln):
     sgs = [k for k, v in m.items()]
     for i, sv in enumerate(sgs):
+        lv = len(sv)
         for sw in sgs[1+i:]:
-            if sw in sv or sv in sw:
-                print('candidate: ', sv, sw)
+            lw = len(sw)
+            if abs(lv - lw) != 1:
+                continue
+
+            if lv > lw:
+                fix = tuple(i for i in sv if i not in sw)
+                if len(fix) == 1:
+                    m_c, chg = upd_m(m, sv, sw)
+                    if not chg:
+                        continue
+                    tst, st = mirrp(m_c, ln)
+                    if tst:
+                        return m_c, True
+            else:
+                fix = tuple(i for i in sw if i not in sv)
+                if len(fix) == 1:
+                    m_c, chg = upd_m(m, sv, sw)
+                    if not chg:
+                        continue
+                    tst, st = mirrp(m_c, ln)
+                    if tst:
+                        return m_c, True
+    return m, False
 
 
 def refl(h, c_s=False):
     # c_s: correct smudge
+
     v = list(map(list, zip(*h)))
+
     hm = m(h)
-    print('hm:', hm)
-    smudge(hm)
     vm = m(v)
-    print('vm:', vm)
+
+    if c_s:
+        hm, chgd = smudge(hm, len(h))
+        if not chgd:
+            vm, chgd = smudge(vm, len(v))
 
     tst, st = mirrp(hm, len(h))
     if tst:
