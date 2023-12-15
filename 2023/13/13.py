@@ -90,6 +90,41 @@ def smudge(m, ln):
     return m, False
 
 
+def smudge_annotated(m, ln):
+    sgs = [k for k, v in m.items()]
+    print(f'smudge cands: {sgs}')
+    for i, sv in enumerate(sgs):
+        lv = len(sv)
+        print(f'v candidate {sv} of len {lv}')
+        for sw in sgs[1+i:]:
+            lw = len(sw)
+            print(f'against w candidate {sw} of len {lw}')
+            if abs(lv - lw) != 1:
+                continue
+
+            print(f'looking closer at {sv} <-> {sw} ({lv} > {lw} ?)')
+            if lv > lw:
+                fix = tuple(i for i in sv if i not in sw)
+                if len(fix) == 1:
+                    m_c, chg = upd_m(m, sv, sw)
+                    if not chg:
+                        continue
+                    tst, st = mirrp(m_c, ln)
+                    if tst:
+                        return m_c, True
+            else:
+                fix = tuple(i for i in sw if i not in sv)
+                if len(fix) == 1:
+                    m_c, chg = upd_m(m, sv, sw)
+                    if not chg:
+                        continue
+                    tst, st = mirrp(m_c, ln)
+                    if tst:
+                        return m_c, True
+    return m, False
+
+
+
 def refl(h, c_s=False):
     # c_s: correct smudge
 
@@ -102,6 +137,13 @@ def refl(h, c_s=False):
         hm, chgd = smudge(hm, len(h))
         if not chgd:
             vm, chgd = smudge(vm, len(v))
+            if not chgd:
+                print(hm)
+                print(vm)
+                print('--------')
+                _, chgd = smudge_annotated(hm, len(h))
+                _, chgd = smudge_annotated(vm, len(v))
+
 
     tst, st = mirrp(hm, len(h))
     if tst:
