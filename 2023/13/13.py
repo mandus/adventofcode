@@ -8,11 +8,14 @@ fn = 'input.txt'
 d = [x.split('\n') for x in open(fn).read().strip().split('\n\n')]
 
 
-def m(p):
+def idx(p):
+    return [tuple(i for i, c in enumerate(ln) if c == '#') for ln in p]
+
+
+def m(ls):
     m = {}
-    for j, ln in enumerate(p):
-        indx = tuple(i for i, c in enumerate(ln) if c == '#')
-        m[indx] = m.get(indx, []) + [j]
+    for i, s in enumerate(ls):
+        m[s] = m.get(s, []) + [i]
     return m
 
 
@@ -22,11 +25,10 @@ def g_p(ls: list) -> list:
     return [[x, y] for i, x in enumerate(ls) for y in ls[1+i:]]
 
 
-def mirrp(m, sz):
-    # we don't need the patterns
+def mirrp(m, ignore=[]):
+    sz = len(list(it.chain.from_iterable(m.values())))
     c = list(it.chain.from_iterable([g_p(v) for _, v in m.items() if len(v) >= 2]))
-    st = [x for x in c if abs(x[0]-x[1]) == 1]
-    # for each in start, see if we can reach either end
+    st = [x for x in c if abs(x[0]-x[1]) == 1 if x not in ignore]
     for s in st:
         le, ri = s
         while [le, ri] in c:
@@ -37,20 +39,10 @@ def mirrp(m, sz):
     return False, ()
 
 
-def mirrs(m):
-    print(sorted([v for _, v in m.items()]))
-
-
 def upd_m(m, v, w):
+    lv, lw = len(m[v]), len(m[w])
+
     m_c = dict(m)
-    lv, lw = len(m_c[v]), len(m_c[w])
-
-    # TODO: If neither is 1, I need to loop over and try
-    # smudging one by one and see what works?
-    #
-    if not (lv == 1 or lw == 1):
-        return m, False
-
     if lv > lw:
         m_c[v] = sorted(list(m_c[v]) + m_c[w])
         del m_c[w]
@@ -60,98 +52,36 @@ def upd_m(m, v, w):
     return m_c, True
 
 
-def smudge(m, ln):
-    sgs = [k for k, v in m.items()]
-    for i, sv in enumerate(sgs):
-        lv = len(sv)
-        for sw in sgs[1+i:]:
-            lw = len(sw)
-            if abs(lv - lw) != 1:
-                continue
-
-            if lv > lw:
-                fix = tuple(i for i in sv if i not in sw)
-                if len(fix) == 1:
-                    m_c, chg = upd_m(m, sv, sw)
-                    if not chg:
-                        continue
-                    tst, st = mirrp(m_c, ln)
-                    if tst:
-                        return m_c, True
-            else:
-                fix = tuple(i for i in sw if i not in sv)
-                if len(fix) == 1:
-                    m_c, chg = upd_m(m, sv, sw)
-                    if not chg:
-                        continue
-                    tst, st = mirrp(m_c, ln)
-                    if tst:
-                        return m_c, True
-    return m, False
-
-
-def smudge_annotated(m, ln):
-    sgs = [k for k, v in m.items()]
-    print(f'smudge cands: {sgs}')
-    for i, sv in enumerate(sgs):
-        lv = len(sv)
-        print(f'v candidate {sv} of len {lv}')
-        for sw in sgs[1+i:]:
-            lw = len(sw)
-            print(f'against w candidate {sw} of len {lw}')
-            if abs(lv - lw) != 1:
-                continue
-
-            print(f'looking closer at {sv} <-> {sw} ({lv} > {lw} ?)')
-            if lv > lw:
-                fix = tuple(i for i in sv if i not in sw)
-                if len(fix) == 1:
-                    m_c, chg = upd_m(m, sv, sw)
-                    if not chg:
-                        continue
-                    tst, st = mirrp(m_c, ln)
-                    if tst:
-                        return m_c, True
-            else:
-                fix = tuple(i for i in sw if i not in sv)
-                if len(fix) == 1:
-                    m_c, chg = upd_m(m, sv, sw)
-                    if not chg:
-                        continue
-                    tst, st = mirrp(m_c, ln)
-                    if tst:
-                        return m_c, True
-    return m, False
-
-
-
-def refl(h, c_s=False):
-    # c_s: correct smudge
-
-    v = list(map(list, zip(*h)))
-
-    hm = m(h)
-    vm = m(v)
-
-    if c_s:
-        hm, chgd = smudge(hm, len(h))
-        if not chgd:
-            vm, chgd = smudge(vm, len(v))
-            if not chgd:
-                print(hm)
-                print(vm)
-                print('--------')
-                _, chgd = smudge_annotated(hm, len(h))
-                _, chgd = smudge_annotated(vm, len(v))
-
-
-    tst, st = mirrp(hm, len(h))
+def refl(h):
+    tst, st = mirrp(m(idx(h)))
     if tst:
         return 100*st[1]
-    tst, st = mirrp(vm, len(v))
+    tst, st = mirrp(m(idx(list(map(list, zip(*h))))))
     if tst:
         return st[1]
 
 
+def smudge(ls: list, tst: bool, st: tuple) -> tuple:
+    for i, v in enumerate(ls):
+        for w in ls[1+i:]:
+            if len(set(v).symmetric_difference(w)) == 1:
+                s_ls = ls[:i] + [w] + ls[i+1:]
+                s_tst, s_st = mirrp(m(s_ls), [st])
+                if s_tst and s_st != st:
+                    return s_tst, s_st
+    return False, ()
+
+
+def smu(h):
+    v = list(map(list, zip(*h)))
+    tst, st = smudge(idx(v), *mirrp(m(idx(v))))
+    if tst:
+        return st[1]
+    tst, st = smudge(idx(h), *mirrp(m(idx(h))))
+    if tst:
+        return 100*st[1]
+    raise Exception()
+
+
 print(f'part1: {sum(refl(p) for p in d)}')
-print(f'part2: {sum(refl(p, True) for p in d)}')
+print(f'part2: {sum(smu(p) for p in d)}')
