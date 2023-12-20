@@ -43,13 +43,13 @@ def process(d: list, pst: tuple = (0, -1), vst: tuple = (0, 1)) -> dict:
         sy = d[r][c]
         if sy == '.' or (sy == '-' and v[0] == 0) or (sy == '|' and v[1] == 0):
             nxt.append((nx, v))
-        elif sy == '-' and v[1] == 0:
+        if sy == '-':
             nxt.extend([(nx, (0, 1)), (nx, (0, -1))])
-        elif sy == '|' and v[0] == 0:
+        if sy == '|':
             nxt.extend([(nx, (1, 0)), (nx, (-1, 0))])
-        elif sy == '/':
+        if sy == '/':
             nxt.append((nx, forw(v)))
-        elif sy == '\\':
+        if sy == '\\':
             nxt.append((nx, backw(v)))
     return m
 
