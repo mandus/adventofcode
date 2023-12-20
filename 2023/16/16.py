@@ -9,65 +9,69 @@ def add(p, v):
 
 
 def out(s, n):
-    if 0 <= n[0] < s[0] and 0 <= n[1] < s[1]:
-        return False
-    return True
+    return not (0 <= n[0] < s[0] and 0 <= n[1] < s[1])
 
 
 def forw(v):
-    return {(0, 1): (-1, 0),
-            (0, -1): (1, 0),
-            (1, 0): (0, -1),
-            (-1, 0): (0, 1)}[v]
+    return (-v[1], -v[0])
 
 
 def backw(v):
-    return {(0, 1): (1, 0),
-            (0, -1): (-1, 0),
-            (1, 0): (0, 1),
-            (-1, 0): (0, -1)}[v]
+    return (v[1], v[0])
 
 
-def process(d: list) -> dict:
+def process(d: list, pst: tuple = (0, -1), vst: tuple = (0, 1)) -> dict:
     m = {}
     seen = {}
     sh = (len(d), len(d[0]))
 
-    nxt = [((0, -1), (0, 1))]
+    nxt = [(pst, vst)]
     while nxt:
         p, v = nxt.pop()
 
-        if (p, v) in seen:
-            # been here before
+        if seen.get((p, v)):
             continue
         seen[(p, v)] = True
 
         # shine the light:
         nx = add(p, v)
         if out(sh, nx):
-            # left grid
             continue
+
         m[nx] = m.get(nx, 0) + 1
         r, c = nx
         sy = d[r][c]
         if sy == '.' or (sy == '-' and v[0] == 0) or (sy == '|' and v[1] == 0):
             nxt.append((nx, v))
-            continue
-        if sy == '-' and v[1] == 0:
+        elif sy == '-' and v[1] == 0:
             nxt.extend([(nx, (0, 1)), (nx, (0, -1))])
-            continue
-        if sy == '|' and v[0] == 0:
+        elif sy == '|' and v[0] == 0:
             nxt.extend([(nx, (1, 0)), (nx, (-1, 0))])
-            continue
-        if sy == '/':
+        elif sy == '/':
             nxt.append((nx, forw(v)))
-            continue
-        if sy == '\\':
+        elif sy == '\\':
             nxt.append((nx, backw(v)))
     return m
 
 
-d = [[c for c in x] for x in open(fn).read().strip().split('\n')]
-m = process(d)
+def p1(d):
+    return len(process(d))
 
-print(f'part1: {len(m)}')
+
+def p2(d):
+    r, c = len(d), len(d[0])
+    assert r == c
+
+    es = []
+    for i in range(r):
+        es.append(len(process(d, (i, -1), (0, 1))))
+        es.append(len(process(d, (i, c), (0, -1))))
+        es.append(len(process(d, (-1, i), (1, 0))))
+        es.append(len(process(d, (r, i), (-1, 0))))
+
+    return max(es)
+
+
+d = [[c for c in x] for x in open(fn).read().strip().split('\n')]
+print(f'part1: {p1(d)}')
+print(f'part2: {p2(d)}')
