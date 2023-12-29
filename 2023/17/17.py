@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 import colorama as cl
+import typing as ty
+import heapq as hq
 
 
-fn = 't1.txt'
+# fn = 't1.txt'
+# fn = 't3.txt'
 fn = 'input.txt'
 
 
@@ -20,11 +23,22 @@ def g(d: list, p: tuple) -> int:
     return d[r][c]
 
 
-def re(p: tuple, d: tuple, le: int, h: int) -> list:
+def re1(p: tuple, d: tuple, le: int, h: int) -> list:
     # where can we go
     r, c = d[0], d[1]
-    g = [(p, (c, r), 0, h), (p, (-c, -r), 0, h)]
+    g = [(p, (-c, -r), 0, h), (p, (c, r), 0, h)]
     if le < 3:
+        g.append((p, d, le, h))
+    return g
+
+
+def re2(p: tuple, d: tuple, le: int, h: int) -> list:
+    # we now go at least 4 but max 10 steps:
+    r, c = d[0], d[1]
+    if le < 4:
+        return [(p, d, le, h)]
+    g = [(p, (-c, -r), 0, h), (p, (c, r), 0, h)]
+    if 4 <= le < 10:
         g.append((p, d, le, h))
     return g
 
@@ -35,13 +49,14 @@ def disp(sh: tuple, m: dict, curmin: int):
             (1, 0): '\u2bc6',
             (-1, 0): '\u2bc5'}
 
-    print(cl.Cursor.POS(3, 3) + f'current min: {curmin}')
+    print(cl.Cursor.POS(3, 3) + f'current min: {curmin:4}')
     for r in range(sh[0]):
         for c in range(sh[1]):
             if (r, c) in m:
                 print(cl.Cursor.POS(c+3, r+6) + cl.Fore.BLUE + dmap[m[(r, c)]], end='')
             else:
                 print(cl.Cursor.POS(c+3, r+6) + cl.Fore.GREEN + '\u2588', end='')
+    print()
 
 
 def merge(s: dict, p: tuple, v: tuple, le: int, h: int) -> dict:
@@ -53,25 +68,16 @@ def merge(s: dict, p: tuple, v: tuple, le: int, h: int) -> dict:
     return s
 
 
-def max_if(li: list, m: int) -> bool:
-    if li:
-        return max(li)
-    return m
-
-
-def hl(d: list, sh: tuple, S: tuple, E: tuple) -> int:
+def hl(d: list, sh: tuple, S: tuple, E: tuple, reach: ty.Callable) -> int:
     se = {}
-    # hlm = {}
     # points in queue: position, direction, num steps, current heat loss
     qu = [(S, (0, 1), 0, 0), (S, (1, 0), 0, 0)]
+    hq.heapify(qu)
 
-    # mhl = sum(sum(x for x in r) for r in d)
-    mhl = (sum(r[i+1] for i, r in enumerate(d) if i+1 < sh[0]) +
-           sum(r[i] for i, r in enumerate(d)))
-    # sum(r[i-1] for i, r in enumerate(d) if i > 0))
+    mhl = sum(sum(x for x in r) for r in d)
 
     while qu:
-        p, v, le, h = qu.pop()
+        p, v, le, h = hq.heappop(qu)
         p, le = add(p, v), le+1
 
         if not ins(sh, p):
@@ -86,16 +92,12 @@ def hl(d: list, sh: tuple, S: tuple, E: tuple) -> int:
             mhl = min(mhl, h)
             continue
 
-        # if (p, v, le) in se and se[(p, v, le)] < h:
-        #     # tested before with lower heat loss - move on
-        #     continue
-        # se[(p, v, le)] = h
-        if p in se and v in se[p] and max_if([hp for lp, hp in se[p][v].items() if lp <= le], mhl) <= h:
+        if p in se and v in se[p] and le in se[p][v] and max(hp for lp, hp in se[p][v].items() if lp <= le) <= h:
             # tested before with lower heat loss - move on
             continue
         se = merge(se, p, v, le, h)
-        for cand in re(p, v, le, h):
-            qu.insert(0, cand)
+        for cand in reach(p, v, le, h):
+            hq.heappush(qu, cand)
 
     return mhl
 
@@ -106,13 +108,26 @@ def init():
 
 
 def p1(d: list) -> int:
-    # init()
     sh = len(d), len(d[0])
     S = (0, 0)
     E = (sh[0]-1, sh[1]-1)
-    return hl(d, sh, S, E)
+    return hl(d, sh, S, E, re1)
+
+
+def p2(d: list) -> int:
+    # init()
+    sh = len(d), len(d[0])
+    r, c = sh
+    S = (0, 0)
+    # need to have at least 4 straight at the end:
+    E1 = (r-1, c-5)
+    e1a = sum(d[r-1][i] for i in range(c-4, c))
+    E2 = (r-5, c-1)
+    e2a = sum(d[i][c-1] for i in range(r-4, r))
+    return min(hl(d, sh, S, E1, re2) + e1a, hl(d, sh, S, E2, re2) + e2a)
 
 
 d = [[int(c) for c in x] for x in open(fn).read().split()]
 
 print(f'part1: {p1(d)}')
+print(f'part2: {p2(d)}')
