@@ -1,0 +1,9 @@
+#!/usr/bin/env goal
+srt:{x@<x}
+d:+"i"$!'=-read"input.txt"
+p:srt'd
+say "p1:", +/abs (*p)-(*|p)
+
+f:=%*|d
+m:(?*|d)!f
+say "p2:", +/(*d)*(m[*d])
