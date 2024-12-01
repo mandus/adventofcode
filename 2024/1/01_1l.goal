@@ -1,0 +1,3 @@
+#!/usr/bin/env goal
+say "p1:",+/abs-/^'+"v"$read"input.txt"
+say "p2:",{+/(*x)*(=*|x)[*x]}(+"v"$read"input.txt")
