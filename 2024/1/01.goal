@@ -1,9 +1,11 @@
 #!/usr/bin/env goal
-srt:{x@<x}
-d:+"i"$!'=-read"input.txt"
-p:srt'd
-say "p1:", +/abs (*p)-(*|p)
+d:+"v"$read"input.txt" / "v" will parse, split newlines/; into rows, further whitespace into cols
+say "p1:", +/abs-/^'d
 
-l:*|d; r:*d / just store "left" and "right"
-m:(?l)!=%l
-say "p2:", +/(r)*(m[r]) / utilize that look-up in dict on unknowns yield 0
+(l; r):(*d; *|d) / just store "left" and "right"
+m:(?r)!=%r / map each value to its count
+say "p2:", +/l*m[l] / utilize that look-up in dict on unknowns yield 0
+
+/ alternate solution:
+(n; c):(*d; =*|d) / = will count each occurence of 0, 1, 2, etc and put the value at the corresponding index (negatives will be ignored)
+say "p2:", +/n*c[n] / index the counts with the numbers, return the count - and multiply with the same number
