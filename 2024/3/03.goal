@@ -1,0 +1,16 @@
+#!/usr/bin/env goal
+d:=-read"input.txt"
+say "p1:", "i"$+/{*/"n"$'","\*|x}',/rx/mul\((\d+,\d+)\)/[d;-1]
+
+r:rx/don\'t\(\)|do\(\)|mul\((\d+,\d+)\)/[d;-1]
+m:1 / enable multiply by default
+f:{
+ s:(*x)[0;3];
+ ?[
+  s="don"; m::0; ?[ / set multiply to zero when don't()
+    s="do("; (m::1;:0); (*/"n"$'","\*|x)*m / reset multiply to 1 when do(), and return 0 - the else-clause handle the mul's
+   ]
+  ]
+}
+say "p2:", "i"$+/f',/r
+
