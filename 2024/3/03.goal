@@ -2,7 +2,7 @@
 d:=-read"input.txt"
 say "p1:", "i"$+/{*/"n"$'","\*|x}',/rx/mul\((\d+,\d+)\)/[d;-1]
 
-r:rx/don\'t\(\)|do\(\)|mul\((\d+,\d+)\)/[d;-1]
+r:rx/do.*?\)|mul\((\d+,\d+)\)/[d;-1]
 m:1 / enable multiply by default
 f:{
  s:(*x)[0;3];
