@@ -1,6 +1,10 @@
 #!/usr/bin/env goal
-d:{(x,0)}''"i"$!'=-read"t1.txt"
+d:{(x,0)}''"i"$!'=-read"input.txt"
 p:{e:*y-*x;?[4>abs e;(*y; (e%abs e) or 0);(*y;0)]}\'d
 say "p1:", +/{1.0=((#x)-(abs+/{*|x}'x))}'p
 
-say p
+t:{1.0=((#x)-(abs+/{*|x}'x))}
+pf:{e:*y-*x;?[4>abs e;(*y; (e%abs e) or 0);(*y;0)]}
+skipmid:{,/(*x;*|x)}
+checkall:{(t@pf\x) or 0<+/({t@pf\skipmid(0;y;y+1)_x}@x)'!#x}
+say "p2:", +/checkall'd
