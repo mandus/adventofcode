@@ -1,0 +1,6 @@
+#!/usr/bin/env goal
+d:{(x,0)}''"i"$!'=-read"t1.txt"
+p:{e:*y-*x;?[4>abs e;(*y; (e%abs e) or 0);(*y;0)]}\'d
+say "p1:", +/{1.0=((#x)-(abs+/{*|x}'x))}'p
+
+say p
