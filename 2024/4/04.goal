@@ -1,0 +1,19 @@
+#!/usr/bin/env goal
+
+d:=-read"input.txt"
+fx:{({x[y;4]="XMAS"} x)'!&x}
+
+turn:{""/+""\'x}
+flip:{""/|""\'x}
+cnt:{+/+/+/fx''x}
+
+diag:{turn(|({({(""/((x@y);y*"-"))} x)'!#x}(|({(""/(y*"-";(x@y)))} x)'!#x)))}
+
+vars:(d;(flip'd);(turn d);(flip'(turn d)))
+dvars:(d;(flip'd);(turn d);(turn(flip'd)))
+
+scnt:cnt vars
+dcnt:cnt(diag'dvars)
+
+say "p1: ",scnt+dcnt
+
