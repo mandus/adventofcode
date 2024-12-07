@@ -17,3 +17,7 @@ dcnt:cnt(diag'dvars)
 
 say "p1: ",scnt+dcnt
 
+d:""\d
+(n;m):(#d@0;#d)-2
+w:{""/""/'x}m^'+n^'d
+say "p2: ",+/+/{(rx/M...A...S|S...A...M/x) and (rx/..M.A.S..|..S.A.M../x)}''w
