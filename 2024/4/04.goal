@@ -1,19 +1,17 @@
 #!/usr/bin/env goal
 
 d:""\=-read"input.txt"
-fx:{({x[y;4]="XMAS"} x)'!&x}
-cnt:{+/+/+/fx''x}
 
-/ base-case
-bs:cnt(""/{(x;+x;|'x;|'+x)}d)
+/ base-case - flatten with ","//
+bs:"XMAS"#","//(""/{(x;+x;|'x;|'+x)}d)
 
-/ diagonals:
+/ use windows for diagonals:
 (n;m):(#d@0;#d)-3
 w:m^'+n^'d
-di:+/cnt'('{""/{x'!4}'({x[y;y]}'{(x;|'x;|'+x;|'+|'x)}x)}''w)
+di:"XMAS"#","//('{""/{x'!4}'({x[y;y]}'{(x;|'x;|'+x;|'+|'x)}x)}''w)
 say "p1: ",bs+di
 
-/windows for part 2
+/ use windows for part 2
 (n;m):(#d@0;#d)-2
 w:{""/""/'x}m^'+n^'d
 say "p2: ",+/+/{(rx/M...A...S|S...A...M/x) and (rx/..M.A.S..|..S.A.M../x)}''w
