@@ -1,0 +1,18 @@
+#!/usr/bin/env goal
+(r;d):"\n\n"\read"input.txt"
+
+pr:(,"0")!(,"0")
+ps:(,"0")!(,"0")
+
+re:"|"\=r
+{(a;b):(x[0];x[1]);?[a in !pr;pr[a],:b;pr[a]:,b];?[b in !ps;ps[b],:a;ps[b]:,a]}'re
+
+s:","\=-d
+res:{?[+/({ck:(0;y;1+y)_x;
+  c:*ck[1];
+  ?[pr[c] and pr[c]#ck[0];:1;0];
+  ?[ps[c] and ps[c]#ck[2];:1;0];
+} x)'!#x;0;"i"$x[_(#x)%2]]}'s
+say "p1:",+/res
+
+
