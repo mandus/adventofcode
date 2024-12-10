@@ -20,16 +20,13 @@ say "p1:",+/res
 fix:{{?[+/chk x;0;1]}'s}^s
 say fix
 
-
-rchk:{say x; ({ck:(0;y;1+y)_x;
+rchk:{res:({ck:(0;y;1+y)_x;
   c:*ck[1];
-  say "pr", y, (c, ck[2]);
-  say "pr-call", y, (c, (ck[0]#pr[c]^ck[0]), ck[1], ck[0]#pr[c], ck[2]);
-  say "ps", y, (ck[0], ck[2]#ps[c], ck[1], ck[2]#ps[c]^ck[2]);
-  ?[pr[c] and pr[c]#ck[0];1;0];
-  ?[pr[c] and pr[c]#ck[0];:rchk (ck[0]#pr[c]^ck[0], ck[1], ck[0]#pr[c], ck[2]);0];
-  ?[ps[c] and ps[c]#ck[2];:rchk (ck[0], ck[2]#ps[c], ck[1], ck[2]#ps[c]^ck[2]);0];
-} x)'!#x}
+  ?[pr[c] and pr[c]#ck[0];:rchk (ck[0]#pr[c]^ck[0], ck[1], (ck[0]#pr[c]), ck[2]);""];
+  ?[ps[c] and ps[c]#ck[2];:rchk (ck[0], (ck[2]#ps[c]), ck[1], ck[2]#ps[c]^ck[2]);""];
+  ?[+/chk x;"";?[(#x)-1=y;(say y;:x);""]]
+} x)'!#x; res}
 
-say rchk fix@0
+res:rchk'fix
+say res
 
