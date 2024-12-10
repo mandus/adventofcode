@@ -1,5 +1,5 @@
 #!/usr/bin/env goal
-(r;d):"\n\n"\read"input.txt"
+(r;d):"\n\n"\read"t1.t"
 
 pr:(,"0")!(,"0")
 ps:(,"0")!(,"0")
@@ -7,12 +7,29 @@ ps:(,"0")!(,"0")
 re:"|"\=r
 {(a;b):(x[0];x[1]);?[a in !pr;pr[a],:b;pr[a]:,b];?[b in !ps;ps[b],:a;ps[b]:,a]}'re
 
-s:","\=-d
-res:{?[+/({ck:(0;y;1+y)_x;
+chk:{({ck:(0;y;1+y)_x;
   c:*ck[1];
   ?[pr[c] and pr[c]#ck[0];:1;0];
   ?[ps[c] and ps[c]#ck[2];:1;0];
-} x)'!#x;0;"i"$x[_(#x)%2]]}'s
+} x)'!#x}
+
+s:","\=-d
+res:{?[+/chk x;0;"i"$x[_(#x)%2]]}'s
 say "p1:",+/res
 
+fix:{{?[+/chk x;0;1]}'s}^s
+say fix
+
+
+rchk:{say x; ({ck:(0;y;1+y)_x;
+  c:*ck[1];
+  say "pr", y, (c, ck[2]);
+  say "pr-call", y, (c, (ck[0]#pr[c]^ck[0]), ck[1], ck[0]#pr[c], ck[2]);
+  say "ps", y, (ck[0], ck[2]#ps[c], ck[1], ck[2]#ps[c]^ck[2]);
+  ?[pr[c] and pr[c]#ck[0];1;0];
+  ?[pr[c] and pr[c]#ck[0];:rchk (ck[0]#pr[c]^ck[0], ck[1], ck[0]#pr[c], ck[2]);0];
+  ?[ps[c] and ps[c]#ck[2];:rchk (ck[0], ck[2]#ps[c], ck[1], ck[2]#ps[c]^ck[2]);0];
+} x)'!#x}
+
+say rchk fix@0
 
