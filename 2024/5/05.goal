@@ -24,6 +24,6 @@ say "p1", p1
 say "p2:",(+/{[t]"i"$(!<t!({[t;x]#t#x} t)'(fm[m;t]@t))[_(#t)%2]}'s)-p1 / just get the middle one for all after sorting, and subtract part 1 result
 
 / actually, the recursive full map doesn't seems to be needed after all:
-p1:+/"i"${?[&/(!#x)=(.|x!({#x#y} x)'(m[x]));x@-2!#x;0]}'s
+p1:+/"i"${?[&/(!#x)=(.|x!({#x#y} x)'(m x));x@-2!#x;0]}'s
 say "p1", p1 
-say "p2:",(+/"i"${(!<x!({[x;y]#x#y} x)'(m@x))@-2!#x}'s)-p1 / just get the middle one for all after sorting, and subtract part 1 result
+say "p2:",(+/"i"${(!<x!({[x;y]#x#y} x)'(m x))@-2!#x}'s)-p1 / just get the middle one for all after sorting, and subtract part 1 result
