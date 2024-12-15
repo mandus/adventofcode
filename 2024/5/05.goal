@@ -1,23 +1,25 @@
 #!/usr/bin/env goal
 (r;d):"\n\n"\read"input.txt"
 
-pr:(,"0")!(,"0")
-ps:(,"0")!(,"0")
-
-re:"|"\=r
-{(a;b):(x[0];x[1]);?[a in !pr;pr[a],:b;pr[a]:,b];?[b in !ps;ps[b],:a;ps[b]:,a]}'re
-chk:{({ck:(0;y;1+y)_x;
-  c:*ck[1];
-  ?[pr[c] and pr[c]#ck[0];:1;0];
-  ?[ps[c] and ps[c]#ck[2];:1;0];
-} x)'!#x}
+re:+"|"\=r
 s:","\=-d
-res:{?[+/chk x;0;"i"$x[_(#x)%2]]}'s
-say "p1:",+/res
 
-fix:{{?[+/chk x;0;1]}'s}^s
-(keys;vals):(+re)@0 1
-k:?keys
-m:k!{vals[&keys=x]}'k
-fm:{[m;x]x!({[m;seen;k]?[m[k];:?,//m[k],o[m;(,//m[k],seen)]'(m[k]^seen);,()]}[m;,()])'x}
-say "p2:",+/{[t]"i"$(!<t!({[t;x]#t#x} t)'(fm[m;t]@t))[_(#t)%2]}'fix
+/ pr:(,"0")!(,"0")
+/ ps:(,"0")!(,"0")
+/ {(a;b):(x[0];x[1]);?[a in !pr;pr[a],:b;pr[a]:,b];?[b in !ps;ps[b],:a;ps[b]:,a]}'re
+/ chk:{({ck:(0;y;1+y)_x;
+/   c:*ck[1];
+/   ?[pr[c] and pr[c]#ck[0];:1;0];
+/   ?[ps[c] and ps[c]#ck[2];:1;0];
+/ } x)'!#x}
+/ res:{?[+/chk x;0;"i"$x[_(#x)%2]]}'s
+/ say "p1:",+/res
+
+/ refactor part 1, based on solution of part 2:
+(keys;vals):re@0 1 
+m:?keys!{vals[&keys=x]}'keys
+fm:{[m;x]x!({[m;seen;k]?[m[k];:?,//m[k],o[m;(,//m[k],seen)]'(m[k]^seen);,()]}[m;,()])'x} / filter with seen to limit recursion depth
+p1:+/{[t]?[(#t)=+/(!#t)=(.|t!({[t;x]#t#x} t)'(fm[m;t]@t));"i"$t[_(#t)%2];0]}'s
+say "p1", p1
+
+say "p2:",(+/{[t]"i"$(!<t!({[t;x]#t#x} t)'(fm[m;t]@t))[_(#t)%2]}'s)-p1 / just get the middle one for all after sorting, and subtract part 1 result
