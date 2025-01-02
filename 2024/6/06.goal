@@ -1,0 +1,46 @@
+#!/usr/bin/env goal 
+
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+d:=-read fn
+l:""\"|"/d
+(e;m;p):{~x?l}'""\"|#^"
+s:1+&*d
+mv:("i"$2 exp !4)!(s;-1;-s;1)
+out:{t:x-y;w:#p;(t<0) or t>w-1}
+turn:15!2*
+iter:{[p;v] / say "v is $v", #?&v; 
+ cp:*&p;rv:mv[p[cp]]; / say "cp is $cp and rv is $rv";
+ (out[cp;rv]) and :v[cp]+:1;
+ np:rv rotate p;
+ (+/np*e) and :v[cp]+:1;
+ ?[+/np*m;:o[turn p;v];:o[np;v[cp]+:1]]
+}
+say "part1: ",#?&iter[p;(#p)#0]
+
+/
+/ First direction; go the 2d route
+d:""\=-read"t1.t"
+\d
+m:~"#"?d
+\m
+
+p:~"^"?d
+\p
+spi:startposidx:*&,/p
+s:stride:#*p
+(r;c):(startrow;startcol):((-s)!spi;s!spi)
+
+turn:15!2*p  / 1 = up, 2 = left, 4 = down, 8 = right - wrap back to 1 = up
+/ alternative:
+/ dir:1
+/ dir:15!2*dir  (if we track direction and position independently)
+/ if we work in 1D (flatten the array and use strid), we can move by '<num> rotate p'
+/ positive number rotates left and negative to the right.
+/ Since rotate will wrap around we need to make sure we don't do that!
+
+chk:+//p*m  / 0 if not hitting anything; 1 if position hits a marker - then we turn
+
+/ experiments - recursive function that fills a 0-array with ones
+fill:{?[(#&x)<#x;(\x;x[x?0]:1;:o[x]);:x]a}
+\
