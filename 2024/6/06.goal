@@ -18,6 +18,10 @@ iter:{[p;v] / say "v is $v", #?&v;
 }
 say "part1: ",#?&iter[p;(#p)#0]
 
+broll:{x and o[-2!x],2!x}
+i2b:{b:broll x; b[1+!(#b)-1]} / convert integer to bin array; strip the leading 0 from broll
+b2i:{"i"$+/x*(2 exp (|!#x))} / convert bin array to integer
+
 /
 / First direction; go the 2d route
 d:""\=-read"t1.t"
