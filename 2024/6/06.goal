@@ -9,18 +9,20 @@ s:1+&*d
 mv:("i"$2 exp !4)!(s;-1;-s;1)
 out:{t:x-y;w:#p;(t<0) or t>w-1}
 turn:15!2*
-iter:{[p;v] / say "v is $v", #?&v; 
- cp:*&p;rv:mv[p[cp]]; / say "cp is $cp and rv is $rv";
- (out[cp;rv]) and :v[cp]+:1;
- np:rv rotate p;
- (+/np*e) and :v[cp]+:1;
- ?[+/np*m;:o[turn p;v];:o[np;v[cp]+:1]]
+iter:{[p;v]
+ cp:*&p;cd:p[cp];rv:mv[p[cp]]
+ (out[cp;rv]) and :v[cp]+:cd
+ np:rv rotate p
+ (+/np*e) and :v[cp]+:cd
+ ?[+/np*m;:o[turn p;v];:o[np;v[cp]+:cd]]
 }
 say "part1: ",#?&iter[p;(#p)#0]
 
 broll:{x and o[-2!x],2!x}
 i2b:{b:broll x; b[1+!(#b)-1]} / convert integer to bin array; strip the leading 0 from broll
 b2i:{"i"$+/x*(2 exp (|!#x))} / convert bin array to integer
+bip:{i:!#x|#y;+/((|x)@i)*(|y)@i} / inner prod of bin arrays; need to index with index-array i and flip order to ensure same size and alignment of bits
+ibip:{bip[i2b x;i2b y]} / convenience; inner prod of bin arrays for two integers.
 
 /
 / First direction; go the 2d route
