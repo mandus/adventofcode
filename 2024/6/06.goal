@@ -4,25 +4,32 @@ fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 d:=-read fn
 l:""\"|"/d
-(e;m;p):{~x?l}'""\"|#^"
 s:1+&*d
 mv:("i"$2 exp !4)!(s;-1;-s;1)
-out:{t:x-y;w:#p;(t<0) or t>w-1}
+(e;m;p):{~x?l}'""\"|#^"
+out:{t:x-y;w:#l;(t<0) or t>w-1}
 turn:15!2*
-iter:{[p;v]
- cp:*&p;cd:p[cp];rv:mv[p[cp]]
- (out[cp;rv]) and :v[cp]+:cd
- np:rv rotate p
- (+/np*e) and :v[cp]+:cd
- ?[+/np*m;:o[turn p;v];:o[np;v[cp]+:cd]]
-}
-say "part1: ",#?&iter[p;(#p)#0]
 
+/ for part2
 broll:{x and o[-2!x],2!x}
 i2b:{b:broll x; b[1+!(#b)-1]} / convert integer to bin array; strip the leading 0 from broll
 b2i:{"i"$+/x*(2 exp (|!#x))} / convert bin array to integer
 bip:{i:!#x|#y;+/((|x)@i)*(|y)@i} / inner prod of bin arrays; need to index with index-array i and flip order to ensure same size and alignment of bits
 ibip:{bip[i2b x;i2b y]} / convenience; inner prod of bin arrays for two integers.
+
+iter:{[p;v;m]
+ cp:*&p;cd:p[cp];rv:mv[p[cp]]
+ (ibip[cd;v[cp]]) and :0 / been here in same direction before; exit 
+ (out[cp;rv]) and :v[cp]+:cd / leaving the area
+ np:rv rotate p
+ (+/np*e) and :v[cp]+:cd / hit edge -> leaving the area
+ ?[+/np*m;:o[turn p;v;m];:o[np;v[cp]+:cd;m]] / hit marker, turn and try again - else update visited and continue
+}
+seen:iter[p;(#p)#0;m]
+say "part1: ",#?&seen
+
+addmark:?&seen[*&p]:0
+say "part2: ",#&({[m;am]?[iter[p;(#p)#0;m[am]:1];0;1]} m)'addmark
 
 /
 / First direction; go the 2d route
