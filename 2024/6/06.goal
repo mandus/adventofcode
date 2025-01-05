@@ -2,58 +2,31 @@
 
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
+
 d:=-read fn
-l:""\"|"/d
-s:1+&*d
+l:""\"|"/d / mark the edges with '|' to easily know later if I hit them 
+s:1+&*d; sz:#l
 mv:("i"$2 exp !4)!(s;-1;-s;1)
 (e;m;p):{~x?l}'""\"|#^"
-out:{t:x-y;w:#l;(t<0) or t>w-1}
+p:*&p / start position
+out:{(x<0) or x>sz-1}
 turn:15!2*
 
 / for part2
-broll:{x and o[-2!x],2!x}
-i2b:{b:broll x; b[1+!(#b)-1]} / convert integer to bin array; strip the leading 0 from broll
-b2i:{"i"$+/x*(2 exp (|!#x))} / convert bin array to integer
-bip:{i:!#x|#y;+/((|x)@i)*(|y)@i} / inner prod of bin arrays; need to index with index-array i and flip order to ensure same size and alignment of bits
-ibip:{bip[i2b x;i2b y]} / convenience; inner prod of bin arrays for two integers.
+i:!4
+i2b:{x and :2!x,o[-2!x]} / integer to binary array
+/b2i:{"i"$+/x*(2 exp (|!#x))} / binary array to integer; not needed for the problem
+ibip:{(x and y) and +/((i2b x)@i)*(i2b y)@i} / inner prod of binary arrays for two integers; index with i since length may differ
 
-iter:{[p;v;m]
- cp:*&p;cd:p[cp];rv:mv[p[cp]]
- (ibip[cd;v[cp]]) and :0 / been here in same direction before; exit 
- (out[cp;rv]) and :v[cp]+:cd / leaving the area
- np:rv rotate p
- (+/np*e) and :v[cp]+:cd / hit edge -> leaving the area
- ?[+/np*m;:o[turn p;v;m];:o[np;v[cp]+:cd;m]] / hit marker, turn and try again - else update visited and continue
+v:sz#0 / visited positions
+iter:{[p;d] /position; direction
+ (ibip[d;v[p]]) and :0 / been here in same direction before; exit 
+ v[p]+:d; np:p - mv[d] / update visited; next position
+ ((out[np]) or e[np]) and :#?&v / leaving the area 
+ ?[m[np];:o[p;turn d];:o[np;d]] / hit marker, turn and try again - else continue
 }
-seen:iter[p;(#p)#0;m]
-say "part1: ",#?&seen
 
-addmark:?&seen[*&p]:0
-say "part2: ",#&({[m;am]?[iter[p;(#p)#0;m[am]:1];0;1]} m)'addmark
-
-/
-/ First direction; go the 2d route
-d:""\=-read"t1.t"
-\d
-m:~"#"?d
-\m
-
-p:~"^"?d
-\p
-spi:startposidx:*&,/p
-s:stride:#*p
-(r;c):(startrow;startcol):((-s)!spi;s!spi)
-
-turn:15!2*p  / 1 = up, 2 = left, 4 = down, 8 = right - wrap back to 1 = up
-/ alternative:
-/ dir:1
-/ dir:15!2*dir  (if we track direction and position independently)
-/ if we work in 1D (flatten the array and use strid), we can move by '<num> rotate p'
-/ positive number rotates left and negative to the right.
-/ Since rotate will wrap around we need to make sure we don't do that!
-
-chk:+//p*m  / 0 if not hitting anything; 1 if position hits a marker - then we turn
-
-/ experiments - recursive function that fills a 0-array with ones
-fill:{?[(#&x)<#x;(\x;x[x?0]:1;:o[x]);:x]a}
-\
+p1: iter[p;1] / implicitly updates v which is used for part2
+say "part1: $p1"
+p2:+/{[am] v::sz#0; m[am]:1; n:iter[p;1]; m[am]:0; n=0}'?&v
+say "part2: $p2"
