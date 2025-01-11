@@ -1,10 +1,11 @@
+#!/usr/bin/env goal
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
-d:": "\=-read fn
-l:{("i"$*x; "v"$*|x)}'d
+l:"v"$":"\=-read fn
 op:(!2)!(+;*)
-
-f:{[g;x;y] *(({[g;x;y] t:*|x; (t>g) and :(t;0); xs:*x;ys:*y; (?[t>1;"i"$"$xs$ys";(op t)/(*x; *y)];*|y)} g)/+(x;y))} / g is the "goal"; i.e. target value - shortcut if we pass
+f:{[g;x;y] *(({[g;x;y] t:*|x; (t>g) and :(t;0); xs:*x;ys:*y; (?[t>1;"i"$"$xs$ys";(op t)/(*x; *y)];*|y)} g)/+(x;y))} / g is the "goal" - shortcut if we are higher
 p:{[g;x;y] (f[g;y])'+(!(-1+#y)#x)}
-say "p1:",+/{?[+/((*x)=)(p[*x;2])(*|x);*x;0]}'l
-say "p2:",+/{?[+/((*x)=)(p[*x;3])(*|x);*x;0]}'l
+p1:+/{?[+/((*x)=)(p[*x;2])(*|x);*x;0]}'l
+say "part1: $p1"
+p2:+/{?[+/((*x)=)(p[*x;3])(*|x);*x;0]}'l
+say "part2: $p2"
