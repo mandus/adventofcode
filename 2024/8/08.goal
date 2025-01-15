@@ -1,5 +1,10 @@
 #!/usr/bin/env goal
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
-d:=-read fn
-\d
+c:""\"."^""/?l:""\""/d:=-read fn
+a:c!&'{~x?l}'c
+(m;n):(&*d;#d)
+\m
+\n
+to2d:{[x;y] ((-x)!y;x!y)}
+say m {[x;y] x to2d'a[y]}'!a / how we can go from 1D to 2D.
