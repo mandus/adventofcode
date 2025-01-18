@@ -2,9 +2,15 @@
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 c:""\"."^""/?l:""\""/d:=-read fn
-a:c!&'{~x?l}'c
+ant:c!&'{~x?l}'c
 (m;n):(&*d;#d)
-\m
-\n
-to2d:{[x;y] ((-x)!y;x!y)}
-say m {[x;y] x to2d'a[y]}'!a / how we can go from 1D to 2D.
+t2:{((-m)!x;m!x)}
+w:{or[or[(*x)<0;(m-1)<(*x)];or[(*|x)<0;(n-1)<(*|x)]]}
+f:{[h;x;y] (x2;y2):t2'(x;y); dt:-/(x2;y2); (x2+(h*dt);y2-(h*dt))}
+res:-1_'{((*x)(f 1)'1_x),and[(#x)>2;o 1_x]}'.ant / the leading '-1_' is because there will be a '0' at the end of each recursion.
+cl:{xt:,/x; ww::w'xt; {ww}^xt}  / not elegant, had to use a global 'ww' here since I need a func to weed out ({ww}^xt)
+p1:#(?,/cl'res) 
+say "p1: $p1"
+res2:{-1_'({[h;x] ((*x)(f h)'1_x),and[(#x)>2;o[h;1_x]]} x)'.ant}'(1+!(m|n))
+p2:#?,/(({t2'x}'.ant),cl',/res2) / this works just because there are more than one antenna for all frequencies... (read problem stmt)
+say "p2: $p2"
