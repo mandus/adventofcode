@@ -14,7 +14,7 @@ turn:15!2*
 
 / for part2
 i:!4
-i2b:{x and :2!x,o[-2!x]} / integer to binary array
+i2b:{x and :2!x,o[-2!x]} / integer to binary array. Note to later: can use "encode" (\) for this; |2\x (| to get same order as i2b)
 /b2i:{"i"$+/x*(2 exp (|!#x))} / binary array to integer; not needed for the problem
 ibip:{(x and y) and +/((i2b x)@i)*(i2b y)@i} / inner prod of binary arrays for two integers; index with i since length may differ
 
