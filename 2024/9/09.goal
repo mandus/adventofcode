@@ -1,7 +1,8 @@
 #!/usr/bin/env goal
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
-w:#d:"i"$'"c"$'"b"$-read fn
+/ w:#d:"i"$'"c"$'"b"$-read fn
+w:#d:"i"$""\-read fn
 (sp;fp):(-1+w>)^'(1+2*!w;2*!w)
 cp:+(d;0,-1_+\d)
 (f;s):(cp@)'(fp;sp)
