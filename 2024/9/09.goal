@@ -1,0 +1,25 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+w:#d:"i"$'"c"$'"b"$-read fn
+(sp;fp):(-1+w>)^'(1+2*!w;2*!w)
+cp:+(d;0,-1_+\d)
+(f;s):(cp@)'(fp;sp)
+f:+(*+f;*|+f;!#f)
+l:+(0 0 0)
+dfr:{
+ (lx;ly):#'(x;y)
+ say "args: $x, $y, $lx, $ly"
+ and[or[~lx;~ly];(say "done"; :0)];
+ (s;f):(*x;*y); m:*s&*f; 
+ say "l is $l and m is $m; handle ($s; $f)";
+ l::(l,+(m;*|s;*|f));
+ ?[
+   m<*f;:o[1_x;((+((*f-m),1_f)),1_y)]
+   m<*s;:o[((+((*s-m),1_s)),1_x);1_y]
+   1_y];
+ }
+r:dfr[s;|f]
+say l
+say r
+
