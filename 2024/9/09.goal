@@ -1,9 +1,8 @@
 #!/usr/bin/env goal
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
-/ w:#d:"i"$'"c"$'"b"$-read fn
 w:#d:"i"$""\-read fn
-(sp;fp):(-1+w>)^'(1+2*!w;2*!w)
+(sp;fp):(-1+w>)^'{(1+x;x)}2*!w
 cp:+(d;0,-1_+\d)
 (f;s):(cp@)'(fp;sp)
 f:+(*+f;*|+f;!#f)
@@ -12,13 +11,15 @@ dfr:{
  (lx;ly):#'(x;y)
  say "args: $x, $y, $lx, $ly"
  and[or[~lx;~ly];(say "done"; :0)];
- (s;f):(*x;*y); m:*s&*f; 
- say "l is $l and m is $m; handle ($s; $f)";
- l::(l,+(m;*|s;*|f));
+ / (s;f):(*x;*y); m:*s&*f; 
+ (sc;sp):*x; (fc;fp;fi):*y; m:sc&fc;
+ say "l is $l and m is $m; handle ($sc; $fc)";
+ and[sp>fp;(say "space right of files, done"; say l; say "add: ",1_y; {l::(l,+x)}'1_y; :0)];
+ l::(l,+(m;sp;fi));
  ?[
-   m<*f;:o[1_x;((+((*f-m),1_f)),1_y)]
-   m<*s;:o[((+((*s-m),1_s)),1_x);1_y]
-   1_y];
+   m<fc;:o[1_x;((+((fc-m),1_f)),1_y)]
+   m<sc;:o[((+((sc-m),(sp+m))),1_x);1_y]
+   :o[1_x;1_y]];
  }
 r:dfr[s;|f]
 say l
