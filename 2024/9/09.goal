@@ -13,13 +13,14 @@ dfr:{
  and[or[~lx;~ly];(say "done"; :0)];
  (sc;sp):*x; (fc;fp;fi):*y; m:sc&fc;
  / say "l is $l and m is $m; handle ($sc $sp; $fc $fp $fi)";
- and[sp>fp;(say "space right of files, done"; say l,y; say "add: ",y; l::(l,y); :0)];
+ and[sp>fp;(l::(l,y); :0)];
  l::(l,+(m;sp;fi));
  ?[
    m<fc;:o[1_x;((+((fc-m);fp;fi)),1_y)]
    m<sc;:o[((+((sc-m),(sp+m))),1_x);1_y]
    :o[1_x;1_y]];
- }
+}
 dfr[s;|f]
-say l
+p1:+/{(c;p;i):x; +/i*(p+!c)}'l
+say "part 1: $p1"
 
