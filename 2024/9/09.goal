@@ -8,11 +8,8 @@ cp:+(d;0,-1_+\d)
 f:+(*+f;*|+f;!#f)
 l:+(0 0 0)
 dfr:{
- (lx;ly):#'(x;y)
- / say "args: $x -- $y -;- $lx, $ly"
- and[or[~lx;~ly];(say "done"; :0)];
+ (lx;ly):#'(x;y); and[or[~lx;~ly];:0];
  (sc;sp):*x; (fc;fp;fi):*y; m:sc&fc;
- / say "l is $l and m is $m; handle ($sc $sp; $fc $fp $fi)";
  and[sp>fp;(l::(l,y); :0)];
  l::(l,+(m;sp;fi));
  ?[
@@ -24,3 +21,17 @@ dfr[s;|f]
 p1:+/{(c;p;i):x; +/i*(p+!c)}'l
 say "part 1: $p1"
 
+l2:+(0 0 0)
+dfr2:{[s;f]
+ and[~(#f);:0]
+ a:*+s; (fc;fp;fi):*f; / a is "avail free space"
+ or[c:(fc>)^a;(l2::(l2,+(*f)); :o[s;1_f])] / no space avail
+ idx:a?*c; (sc;sp):s idx
+ l2::(l2,+(fc;sp;fi))
+ s:@[s;idx;(-fc;fc)+]
+ :o[s;1_f]
+}
+dfr2[s;|f]
+p2:+/{(c;p;i):x; +/i*(p+!c)}'l2
+say l2
+say "part 2: $p2"
