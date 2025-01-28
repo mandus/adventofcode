@@ -35,3 +35,8 @@ dfr2[s;|f]
 p2:+/{(c;p;i):x; +/i*(p+!c)}'l2
 say l2
 say "part 2: $p2"
+
+
+/ need to gather space around "empty" files to make the space contiguous
+
+{say "look for $x"; p:fp x;mv:d (p+1); @d[d;p+(-1;1);(mv;-mv)+]}'|(d fp)?0
