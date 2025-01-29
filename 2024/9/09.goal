@@ -7,28 +7,33 @@ cp:+(d;0,-1_+\d)
 (f;s):(cp@)'(fp;sp)
 f:+(*+f;*|+f;!#f)
 
+chk:{(c;p;i):x; +/i*(p+!c)}
+
 dfr:{[x;y;l]
- (lx;ly):#'(x;y); and[or[~lx;~ly];:l];
- (sc;sp):*x; (fc;fp;fi):*y; m:sc&fc;
- and[sp>fp;(l,:y; :l)];
+ / or[&'#'(x;y);:l]; / guard if we reach end of either list - but not needed
+ (sc;sp):*x; (fc;fp;fi):*y; m:sc&fc; / s*: space count,pos; f* file count,pos,id;
+ and[sp>fp;:l,:y]; / all space is right of files, so done with defrag.
+
  l,:+(m;sp;fi);
  ?[
-   m<fc;:o[1_x;((+((fc-m);fp;fi)),1_y);l]
-   m<sc;:o[((+((sc-m),(sp+m))),1_x);1_y;l]
-   :o[1_x;1_y;l]];
+   m<fc;:o[1_x;((+((fc-m);fp;fi)),1_y);l] / space less than file
+   m<sc;:o[((+((sc-m),(sp+m))),1_x);1_y;l] / file smaller than space
+        :o[1_x;1_y;l]]; / file and space matched
 }
-p1:+/{(c;p;i):x; +/i*(p+!c)}'dfr[s;|f;+(0 0 0)]
+p1:+/chk'dfr[s;|f;+(0 0 0)]
 say "part 1: $p1"
 
 dfr2:{[s;f;l]
  and[~(#f);:l] / done
- a:*+s; (fc;fp;fi):*f; / a is "avail free space"
- or[c:(fc>)^a;(l,:+(*f); :o[s;1_f;l])] / no space avail
- idx:a?*c; (sc;sp):s idx
- and[sp>fp;(l,:+(*f); :o[s;1_f;l])] / avail space is right, so do not move
- l,:+(fc;sp;fi)
- s:@[s;idx;(-fc;fc)+]
- :o[s;1_f;l]
+
+ a:*+s; (fc;fp;fi):*f; / a is list of avail free space
+ or[c:(fc>)^a;(l,:+(*f);:o[s;1_f;l])] / no space avail? c is falsy or list of space that can fit the file
+
+ idx:a?*c; (sc;sp):s idx / try first (left-most) available space
+ and[sp>fp;(l,:+(*f);:o[s;1_f;l])] / all avail space is right, keep files as is and continue to next
+
+ s:@[s;idx;(-fc;fc)+] / reduce empty space with filesize, and move pos of remaining avail space same amount
+ :o[s;1_f;l,+(fc;sp;fi)] / move file to avail space and continue
 }
-p2:+/{(c;p;i):x; +/i*(p+!c)}'dfr2[s;|f;+(0 0 0)]
+p2:+/chk'dfr2[s;|f;+(0 0 0)]
 say "part 2: $p2"
