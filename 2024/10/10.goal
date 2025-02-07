@@ -12,3 +12,6 @@ x:,0
 v:((0 1);(2 1))
 say x{,/x,´`v y}/!2
 
+/ also useful:
+y:*(n+´(v 0)) / neighbours of the first - need to run over all
+v 1 @ &(v 1) in y / give the neighbours that contains the next value (1 in this case).
