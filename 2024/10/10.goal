@@ -1,0 +1,14 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+l:,/(w:#d)d:"i"$""\',/=-read fn
+(k;v):+{(x;&x=l)}'!10 / probably only need v
+/ we need to record how many 9's that can be reached from each 0 as that is the "score" to be added
+n:(-w;-1;1;w)
+/ find neighbours: (n+´(v 0))
+
+/ Maybe useful pattern:
+x:,0
+v:((0 1);(2 1))
+say x{,/x,´`v y}/!2
+
