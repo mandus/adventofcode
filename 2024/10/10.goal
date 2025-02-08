@@ -19,8 +19,19 @@ n:(-w;-1;1;w)
 / something like this (only works for the very first step though, because it use
 / all neighbours for each path - we need to find neighbours for each tail and 
 / add just that)
-(v 0){say "x: $x, y: $y"; t:*'|'x; N:n+´t; r:v y; ,/(,/x,`´)'(r@&r¿)'N}/(1+!3)
+/ (v 0){say "x: $x, y: $y"; t:*'|'x; N:n+´t; r:v y; ,/(,/x,`´)'(r@&r¿)'N}/(1+!3)
+/ closer, but still not correct ? Or maybe it's there?
+r:,/(v 0){
+ /say "x: $x, y: $y"; 
+ ({[y;x] 
+ /say "x_i: $x, y_i: $y"; 
+ N:n+´*|x; r:v y; 
+ /say "N: $N, r: $r"; 
+ /say r@&r¿N;
+ (,/x,´)'r@&r¿N}y)',/x}/(1+!9)
 
+say "p1",+/=*+?{(*x;*|x)}'r
 
+/x,`´)'r@&r¿N}y)',/x}/(1+!3)
 / vim: wrap
 
