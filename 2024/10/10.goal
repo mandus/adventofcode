@@ -1,37 +1,17 @@
 #!/usr/bin/env goal
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
-l:,/(w:#d)d:"i"$""\=-read fn
-(k;v):+{(x;&x=l)}'!10 / probably only need v
-/ we need to record how many 9's that can be reached from each 0 as that is the "score" to be added
-n:(-w;-1;1;w)
-/ find neighbours: (n+´(v 0))
+v:,/(w:#*v)v:10,'"i"$""\=-read fn
+v:(&v=)'!10 
+n:(-w;-1;1;w)                   / neighbour stencil
 
-/ Maybe useful pattern:
-/ x:,0
-/ v:((0 1);(2 1))
-/ say x{,/x,´`v y}/!2
-
-/ also useful:
-/ y:*(n+´(v 0)) / neighbours of the first - need to run over all
-/ v 1 @ &(v 1)¿y / give the neighbours that contains the next value (1 in this case).
-
-/ something like this (only works for the very first step though, because it use
-/ all neighbours for each path - we need to find neighbours for each tail and 
-/ add just that)
-/ (v 0){say "x: $x, y: $y"; t:*'|'x; N:n+´t; r:v y; ,/(,/x,`´)'(r@&r¿)'N}/(1+!3)
-/ closer, but still not correct ? Or maybe it's there?
-r:,/(v 0){
- /say "x: $x, y: $y"; 
- ({[y;x] 
- /say "x_i: $x, y_i: $y"; 
- N:n+´*|x; r:v y; 
- /say "N: $N, r: $r"; 
- /say r@&r¿N;
- (,/x,´)'r@&r¿N}y)',/x}/(1+!9)
+r:,/(v 0){                      / start from every zero
+ ({[y;x]                        / inner function
+ N:n+´*|x; r:v y;               / get neighbours for the tail; get the next row for convenience
+ (,/x,´)'r@&r¿N}y)',/x}/(1+!9)  / join current path with all possible next steps using each right (´)
 
 say "p1",+/=*+?{(*x;*|x)}'r
+say "p2",+/=*'?r
 
-/x,`´)'r@&r¿N}y)',/x}/(1+!3)
 / vim: wrap
 
