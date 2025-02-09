@@ -11,7 +11,7 @@ r:,/(v 0){                      / start from every zero
  (,/x,´)'r@&r¿N}y)',/x}/(1+!9)  / join current path with all possible next steps using each right (´)
 
 say "p1",+/=*+?{(*x;*|x)}'r
-say "p2",+/=*'?r
+say "p2",#r
 
 / vim: wrap
 
