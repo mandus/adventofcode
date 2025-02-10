@@ -3,9 +3,9 @@ fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 l:"v"$-read fn
 f:{?[~x;1;2!&(sx:"s"$x);2024*x;"i"$"n"$2$sx]} / last part: cut string in two, need double-cast (n -> i) to handle leading zeros
-say "p1",#l{[x;y],/f'x}/!25
+say "p1",# 25{,/f'x}/l
 
 / for p2, we work on a dictionary since we then can add and multiply on the values
 grp:{and["i"=@x;x:,x]; (?x)!#'=(!#x)!%x} / group by value/count; make sure we work on a list
-say "p2",+/.(grp l){[d;i] +/{(n;c):x; c*grp f n}'+(!d;.d)}/!75 / just sum the counts
+say "p2",+/.75{+/{(n;c):x; c*grp f n}'+(!x;.x)}/(grp l) / just sum the counts
 
