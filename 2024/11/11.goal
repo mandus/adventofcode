@@ -1,0 +1,6 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+l:"v"$'*=-read fn
+f:{?[~x;1;2!(m:&"s"$x);2024*x;"i"$"n"$(0;(m%2))_"s"$x]}
+say "p1",#l{[x;y],/f'x}/!25
