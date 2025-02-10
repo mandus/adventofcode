@@ -2,7 +2,7 @@
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 l:"v"$-read fn
-f:{?[~x;1;2!(m:&"s"$x);2024*x;"i"$"n"$(0;(m%2))_"s"$x]}
+f:{?[~x;1;2!&(sx:"s"$x);2024*x;"i"$"n"$2$sx]} / last part: cut string in two, need double-cast (n -> i) to handle leading zeros
 say "p1",#l{[x;y],/f'x}/!25
 
 / for p2, we work on a dictionary since we then can add and multiply on the values
