@@ -1,0 +1,12 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+v:""\"."/(w:1+&*v)v:=-read fn
+a:(?v)!(&v=)'"."^?v
+n:(-w;-1;1;w)
+/ bug: need to handle regions that are not connected separately?
+r:.((,".")!(,0)){l:v y; and["."=l;:x]; x+(,l)!(,1)}/!#v
+p:.((,".")!(,0)){l:v y; and["."=l;:x]; x+(,l)!(,4-+/(y+´n) in a l)}/!#v
+say r
+say p
+say "p1",+/r*p
