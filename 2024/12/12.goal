@@ -10,3 +10,28 @@ p:.((,".")!(,0)){l:v y; and["."=l;:x]; x+(,l)!(,4-+/(y+´n) in a l)}/!#v
 say r
 say p
 say "p1",+/r*p
+
+gr:(,".")!(,0)
+lgr:(,".")!(,0)
+
+fgr:{[l;N;x] 
+ say "check $l $x for $N"; 
+ say gr; 
+ say N¿gr["$l$x"]; 
+ ?[+/N¿gr["$l$x"];:x;:0]}
+
+/ Problem: I may create a new group for label because the location 
+/ that bridge to an existing group is not scanned yet. So if I later
+/ find a label that bridge (neighbours in 2 or more groups), we need 
+/ to merge the groups!
+{l:v x; N:x+´n;
+ say "categorize $l at $x with neig $N";
+ ?[lg:lgr l; or[flg:+/(fgr[l;N])'lg;(flg:1+|/lg; lgr[l],:flg)];(lgr[l]:,1;flg:1)]
+ ?[gr["$l$flg"]; gr["$l$flg"],:x; gr["$l$flg"]:,x]}'!#v
+
+say gr
+say r:{?["."=*""\x;0;#gr x]}'!gr
+say p:{?["."=*""\x;0;+/({v:gr x; 4-+/(y+´n)¿v} x)'gr x]}'!gr
+say "p1",+/r*p
+
+
