@@ -22,3 +22,10 @@ bd:(0 1 2 3)!(((0 0);(1 0));((0 0);(0 1));((1 0);(1 1));((0 1);(1 1))) / boundar
 
 / e.g  - the upper edge of node at index 13 (o2t 13 -> 3 2):
 (o2t 13)+´(dr 0)
+
+N:n+´ / neighbours
+out:{,/(&(0>)x;&(-1+#v)<x)} / indecis in the neighbour vector that's outside and should be discarded
+ins:{(out x)^!4}
+/ e.g. neighbours at 3 inside area:
+(N 3)@i N 3 / -> 2 4 8  for test-case with w=5
+
