@@ -20,16 +20,17 @@ o2t:{(w!x;(-w)!x)}
 bd:(0 1 2 3)!(((0 0);(1 0));((0 0);(0 1));((1 0);(1 1));((0 1);(1 1))) / boundary points up ; left; right ; down
 
 mrg:{
- t:({(bs;be):y;(ns;ne):x; ?[be~ns;(bs;ne);y]} y)'x; 
+ t:({(s;e):y;(S;E):x; ?[e~S;(S;E);y]} y)'x; 
  e:1_y; 
  ?[(&e¿(*'|'t));t;(t,(,y))]}
 
-say "p2", +/r*{[t]
- t:^t
- m::t!({t:n+´y;i:!4; (.x^(t i)!i)} t)'t
+p:{[g] / iterate over the group of nodes (index in 1d)
+ g:^g
+ m::g!({b:n+´y;i:!4; .x^(b i)!i} g)'g / map each node to b, the boundary of the node not in the group
  b::(!4)!(4#,())
  {(x;e): x; 
   ({[n;e] k:(o2t n)+´bd e; 
     b[e]:?[b e;mrg[b e;k];,k]} x)'e; b}'+(!m;.m)
  +/#'.b
 }'.gr
+say "p2", +/r*p
