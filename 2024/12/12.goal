@@ -10,10 +10,13 @@ nxt:{[x;l]N:x+´n;N:((-1+#v)<)^((0>)^N);N@&(l=)v N}
 addgrp:{[g;l;x] vst[x]and:0;vst[x]:1;gr[g],:x;:o[g;l]'nxt[x;l]}
 over:{vst[x]and:0;vst[x]:1;l:v x;(l~".")and:0;gr[x]:,x; addgrp[x;l]'nxt[x;l]}
 over'!#v
-r:{?["."~x;0;#gr x]}'!gr
-p:{?["."~x;0;+/({v:gr x; 4-+/(y+´n)¿v} x)'gr x]}'!gr
+gr:-1_^gr / get rid of the dummy "." group
+/r:{#gr x}'!gr
+r:#'.gr
+/p:{+/({v:gr x; 4-+/(y+´n)¿v} x)'gr x}'!gr
+p:{+/({4-+/(y+´n)¿x} x)'x}'.gr
 say "p1",+/r*p
-say gr
+say .gr
 
 o2t:{(w!x;(-w)!x)}
 t2o:{w/|x}
@@ -21,11 +24,26 @@ t2o:{w/|x}
 bd:(0 1 2 3)!(((0 0);(1 0));((0 0);(0 1));((1 0);(1 1));((0 1);(1 1))) / boundary points up ; left; right ; down
 
 / e.g  - the upper edge of node at index 13 (o2t 13 -> 3 2):
-(o2t 13)+´(dr 0)
+/say (o2t 13)+´(bd 0)
 
 N:n+´ / neighbours
-out:{,/(&(0>)x;&(-1+#v)<x)} / indecis in the neighbour vector that's outside and should be discarded
-ins:{(out x)^!4}
+/should not discard if neighbours is outside - it mean the edge actually always count in part 2 - but lookup will wrap around, which I don't need to consider when outside.. But I probably don't need to lookup value in this part..
+/out:{,/(&(0>)x;&(-1+#v)<x)} / indecis in the neighbour vector that's outside and should be discarded
+/ins:{(out x)^!4}
 / e.g. neighbours at 3 inside area:
-(N 3)@i N 3 / -> 2 4 8  for test-case with w=5
+/(N 3)@i N 3 / -> 2 4 8  for test-case with w=5
+
+t:*.gr
+m:t!({t:N y;i:!4; (.x^(t i)!i)} t)'t
+b:(!4)!(4#,())
+
+mrg:{
+ say "mrg $x with $y"; 
+ say "b is now:", b;
+ t:({(bs;be):y;(ns;ne):x; ?[be~ns;(bs;ne);y]} y)'x; 
+ e:1_y; 
+ ?[(&e¿(*'|'t));t;(t,(,y))]}
+
+{say "handle node $x", b; e:m x; ({[n;e] k:(o2t n)+´bd e; say "at node $n edge $e the boundary is $k"; b[e]:?[b e;mrg[b e;k];,k]} x)'e}'!m
+say b
 
