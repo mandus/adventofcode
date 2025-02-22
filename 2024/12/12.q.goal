@@ -1,0 +1,26 @@
+#!/usr/bin/env goal
+
+/ looking at q solution from Rory Kemp (https://q.kx.com/aoc24/12.html); 
+/ recreate it in goal:
+/ nicer, but also slower than my solution
+
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+n:#i:""\=-read fn
+
+sh:n#''(»';«';»;«)@` / shifts
+adj:i=´sh i / adjacents 
+sg:"s"$g:{x&/((n*n+1)*~adj)+sh x}/(-n)$!(n*n) / find groups
+G:,/g
+r:=%G
+p:+/'(=({,/+/~x=´sh x}sg)!G) (?G)
+say "p1", +/r*p
+
+pg:{x>(»x)} / prior greater; apply > pairwise over a list
+/pg'g=4 / first in each row (left border)
+/+pg'+g=4 / first in each column (up border)
+/|'pg'|'g=4 / last in each row (right border)
+/|+pg'+|g=4 / last in each column (lower border)
+/ but simpler; I can repeatedly do reverse flip (|+)
+t:{+//pg'+pg'x} / apply prior greater on the flipped list to get first in each group
+say "p2", +/r*{+/t'3{|+x}\g=x}'?G

@@ -34,13 +34,3 @@ p:{[g] / iterate over the group of nodes (index in 1d)
  +/#'.b
 }'.gr
 say "p2", +/r*p
-
-/ looking at q solution from Rory Kemp (https://q.kx.com/aoc24/12.html); try to recreate in goal:
-n:#i:""\=-read fn
-sh:n#''(»';«';»;«)@`
-adj:i=´sh i
-sg:"s"$g:{x&/((n*n+1)*~adj)+sh x}/(-n)$!(n*n)
-G:,/g
-r:=%G
-p:+/'(=({,/+/~x=´sh x}sg)!G) (?G)
-say "p1", +/r*p
