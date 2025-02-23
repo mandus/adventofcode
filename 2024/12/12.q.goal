@@ -16,7 +16,7 @@ r:=%G
 p:+/'(=({,/+/~x=´sh x}sg)!G) (?G)
 say "p1", +/r*p
 
-pg:{x>(»x)} / prior greater; apply > pairwise over a list
+pg:{x>»x} / prior greater; apply > pairwise over a list
 /pg'g=4 / first in each row (left border)
 /+pg'+g=4 / first in each column (up border)
 /|'pg'|'g=4 / last in each row (right border)

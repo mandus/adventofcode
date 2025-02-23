@@ -3,12 +3,13 @@ fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 v:""\"."/(w:1+&*v)v:=-read fn
 
-n:(-w;-1;1;w)
-vst:(#v)#0
+n:(-w;-1;1;w) / neighbours
+vst:(#v)#0 / visited
 gr:(,".")!(,0)
-nxt:{[x;l]N:x+´n;N:((-1+#v)<)^((0>)^N);N@&(l=)v N}
+nxt:{[x;l] N:((-1+#v)<)^((0>)^(x+´n));N@&l=v N} / note: filter out of bounds (negative/>=#v)
 addgrp:{[g;l;x] vst[x]and:0;vst[x]:1;gr[g],:x;:o[g;l]'nxt[x;l]}
 over:{vst[x]and:0;vst[x]:1;l:v x;(l~".")and:0;gr[x]:,x; addgrp[x;l]'nxt[x;l]}
+
 over'!#v
 gr:-1_^gr / get rid of the dummy "." group
 r:#'.gr
@@ -17,9 +18,10 @@ say "p1",+/r*p
 
 o2t:{(w!x;(-w)!x)}
 
-bd:(0 1 2 3)!(((0 0);(1 0));((0 0);(0 1));((1 0);(1 1));((0 1);(1 1))) / boundary points up ; left; right ; down
+/ boundary points up ; left; right ; down:
+bd:(0 1 2 3)!(((0 0);(1 0));((0 0);(0 1));((1 0);(1 1));((0 1);(1 1)))
 
-mrg:{
+mrg:{ /merge connecting boundaries; x is the current boundary; y is the new to merge/add
  t:({(s;e):y;(S;E):x; ?[e~S;(S;E);y]} y)'x; 
  e:1_y; 
  ?[(&e¿(*'|'t));t;(t,(,y))]}
