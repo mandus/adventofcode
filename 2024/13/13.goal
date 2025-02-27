@@ -1,0 +1,4 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+say read fn
