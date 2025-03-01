@@ -6,6 +6,6 @@ d:{"i"$2_''", "\*'|'": "\x}'='"\n\n"\-read fn
 / cramer's rule - simpler to express
 dt:{-/x*|y} / determinant for 2x2 matrix
 n:{[a;b;t] "i"$'(dt[t;b];dt[a;t])%dt[a;b]} / solve for Number of button presses on A and B; round to integer
-e:{(a;b;t):x; ?[(t~+/((na;nb):n[a;b;t])*(a;b));nb+3*na;0]} / run, and filter on those not matching target
-say "p1:", +/e'd
-say "p2:", +/e'(0;0;10000000000000)+´d
+e:{(a;b;t):x; ?[(t~+/(r:n[a;b;t])*(a;b));3 1*r;0]} / run, and filter on those not matching target
+say "p1:", +//e'd
+say "p2:", +//e'(0;0;10000000000000)+´d
