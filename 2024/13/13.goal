@@ -1,4 +1,18 @@
 #!/usr/bin/env goal
 fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
-say read fn
+
+/ split on empty line (\n\n) - then extract A, B, and target
+d:{"i"$2_''", "\*'|'": "\x}'='"\n\n"\-read fn 
+
+/ solving the linear equation - and round to ensure we try integer 
+/ since we only can do "full button press" :-) 
+n:{(ax;ay):x; (bx;by):y; (tx;ty): z; 
+   nb:(ty-(ay*(tx%ax)))%(by-(ay*(bx%ax))); 
+   "i"$'round'((tx%ax)-nb*(bx%ax);nb)}
+
+/ technically should probably check that na or nb isn't negative - but not needed for my input
+/ and neither is the >100 presses stated for part1 in the description
+e:{(a;b;t):x; ?[(t~+/((na;nb):n[a;b;t])*(a;b));nb+3*na;0]}
+say "p1:", +/e'd
+say "p2:", +/e'(0;0;10000000000000)+´d
