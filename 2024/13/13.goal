@@ -11,16 +11,8 @@ n:{(ax;ay):x; (bx;by):y; (tx;ty): z;
    nb:(ty-(ay*(tx%ax)))%(by-(ay*(bx%ax))); 
    "i"$'round'((tx%ax)-nb*(bx%ax);nb)}
 
-/ cramer's rule - simpler to express
-dt:{-/x*|y}
-nc:{[a;b;t] "i"$'(dt[t;b];dt[a;t])%dt[a;b]}
-
 / technically should probably check that na or nb isn't negative - but not needed for my input
 / and neither is the >100 presses stated for part1 in the description
 e:{(a;b;t):x; ?[(t~+/((na;nb):n[a;b;t])*(a;b));nb+3*na;0]}
-ec:{(a;b;t):x; ?[(t~+/((na;nb):nc[a;b;t])*(a;b));nb+3*na;0]}
 say "p1:", +/e'd
 say "p2:", +/e'(0;0;10000000000000)+´d
-
-say "p1,c:", +/ec'd
-say "p2,c:", +/ec'(0;0;10000000000000)+´d

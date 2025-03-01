@@ -1,0 +1,11 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+/ split on empty line (\n\n) - then extract A, B, and target
+d:{"i"$2_''", "\*'|'": "\x}'='"\n\n"\-read fn 
+/ cramer's rule - simpler to express
+dt:{-/x*|y} / determinant for 2x2 matrix
+n:{[a;b;t] "i"$'(dt[t;b];dt[a;t])%dt[a;b]} / solve for Number of button presses on A and B; round to integer
+e:{(a;b;t):x; ?[(t~+/((na;nb):n[a;b;t])*(a;b));nb+3*na;0]} / run, and filter on those not matching target
+say "p1:", +/e'd
+say "p2:", +/e'(0;0;10000000000000)+´d
