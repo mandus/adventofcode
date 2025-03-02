@@ -4,7 +4,7 @@ fn:"input.txt"
 d:"v"$","\2_''" "\=-read fn
 
 m:(w;h):1+|/*+d
-p:{(w!x 0;h!x 1)}'{(*x)+100**|x}'d
+p:(m!')'{(*x)+100**|x}'d
 s:"i"$m%2
 gb:{#'=(!#x)!%x} / group by, but skip the key - only need values
 say "p1:",*/gb({x<s}'{{|/s=x}'p}^p)
@@ -14,7 +14,7 @@ t2o:{*x+(w**|x)}
 / o2t:{(w!x;(-w)!x)}
 
 {say x; 
-  mr:fgb({(w!x 0;h!x 1)}'({(*y)+x**|y} x)'d) / map the robots
+  mr:fgb((m!')'({(*y)+x**|y} x)'d) / map the robots
   show:(t2o'!mr)!.mr / 1D map for the robots
   pr:(*/m)#" "
   say "\n"/""/'(w*!h)_@[pr;!show;:;"s"$.show]
