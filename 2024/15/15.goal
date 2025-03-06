@@ -1,0 +1,26 @@
+#!/usr/bin/env goal
+
+/ use -1 for boundary, 1 for stone and a mask with 2 at the robot
+d:(-1 -1 -1 -1 -1;-1 2 1 0 -1;-1 0 1 0 -1;-1 0 0 1 -1; -1 -1 -1 -1 -1)
+w:#*d /width
+m:2*d=2
+b:d-m / the base to work with
+e:b=-1 /edge mask
+
+ec:{#&1=,/x &e} / check if there is a 1 on edge - moved off
+/say tm:w#'(«m) / shift up (^)
+/tm:w#'(»m) / shift down (v)
+tm:w#'(»'m) / shift right (>)
+/tm:w#'(«'m) / shift left (<)
+
+say tb:b+tm / temporary new base with mask added
+/ say tb=2
+say #&,/tb=3 / 1 if we have 3
+say ttm:3*tm=2
+s:ttm-tm
+say b+(»'s)-s / shift the stone right. 
+/ need to check for 2: moved into another stone; keep moving
+/                   0 on edge: moved stone into edge; abort - can not move stones this direction
+/                   else we're done
+
+/ if all is good, we can continue
