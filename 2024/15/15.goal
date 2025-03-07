@@ -24,3 +24,14 @@ say b+(»'s)-s / shift the stone right.
 /                   else we're done
 
 / if all is good, we can continue
+
+
+s:{w#'(((""\"<^>v")!(«';«;»';»))x)y}
+say "start", d
+say "end", d{[x;y] / say "x: $x"; 
+  m:2*x=2; 
+  b:x-m; 
+  / say "b: $b", s[y;m];
+  tx:s[y;m]+b;
+  ?[(#&,/tx=2);tx;x]
+}/(""\"^^>>>vv<")
