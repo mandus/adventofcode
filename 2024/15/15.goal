@@ -3,50 +3,27 @@ fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 (d;c):='"\n\n"\-read fn
 c:,/""\c
-d:-36+"b"$d
-d:d-(26*d=28)+(11*d=12)+(10*d=10) / mark -1 blocks, 1 stones, 2 robot
-w:#*d /width
+(e;b;r;s):(35;46;64;79)=`"b"$d / (#=35, .=46, @=64, O=79)
+(h;w):(#e;#*e) / height, width
 
+ec:{#&-2=,/x &e} / check if there is a -2 at one of the blocks; stone moved to edge
 
-m:2*d=2
-b:d-m / the base to work with
-e:b=-1 / edge mask; all the fixed blocks
-
-ec:{#&1=,/x &e} / check if there is a 1 on edge - moved off
-/say tm:w#'(«m) / shift up (^)
+/tm:w#'(«m) / shift up (^)
 /tm:w#'(»m) / shift down (v)
-tm:w#'(»'m) / shift right (>)
+/tm:w#'(»'m) / shift right (>)
 /tm:w#'(«'m) / shift left (<)
 
-say tb:b+tm / temporary new base with mask added
-/ say tb=2
-say #&,/tb=3 / 1 if we have 3
-say ttm:3*tm=2
-s:ttm-tm
-say b+(»'s)-s / shift the stone right. 
-/ need to check for 2: moved into another stone; keep moving
-/                   0 on edge: moved stone into edge; abort - can not move stones this direction
-/                   else we're done
+pr:{say "\n"/"c"$(46*0=x)+(64*2=x)+(79*1=x)+(35*-3=x)}
+sh:{w#'(((""\"<^>v")!(«';«;»';»))x)y} / shifts
+ms:{[og;cm;b;r;m] / function for moving stones when needed
+ bm:b+m;
+ ?[#&,/bm=2;:o[og;cm;b;r;sh[cm;m]];(ec bm);:og;b+r+m]}
 
-/ if all is good, we can continue
-
-
-s:{w#'(((""\"<^>v")!(«';«;»';»))x)y}
-ms:{[x;y;cm] / function for moving stones when needed
-             / if unable to move/compress (running into edge), return y, the previos pattern
-r:2*x=3
-m:x=3
-tx:x-3*x=3
-r+tx+s[cm;m] / move stone one step further
-/ if I now still have a "2", need to recurse - but state is different so recursion doesn work really
-}
-say "start", d
-say "end", d{[x;cm] / say "x: $x"; 
-  m:2*x=2; 
-  b:x-m; 
-  / say "b: $b", s[y;m];
-  tx:s[cm;m]+b;
-  ?[(#&,/tx=3);ms[tx;x;cm];(#&,/tx=2);tx;x]
+d:(2*r)+s-(3*e) / use 2 for robot, and -3 for edge
+/pr d
+res:d{[x;cm] 
+  r:2*x=2; b:x-r; r:sh[cm;r]; tx:r+b;
+  ?[(#&,/tx=3);:ms[x;cm;tx-3*tx=3;r;sh[cm;r=2]];(#&,/tx=2);tx;x]
 }/c
-
-
+/pr res
+say "p1:", +/,/(100*!h)+'&res=1
