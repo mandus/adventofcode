@@ -1,11 +1,16 @@
 #!/usr/bin/env goal
-
-/ use -1 for boundary, 1 for stone and a mask with 2 at the robot
-d:(-1 -1 -1 -1 -1;-1 2 1 0 -1;-1 0 1 0 -1;-1 0 0 1 -1; -1 -1 -1 -1 -1)
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+(d;c):='"\n\n"\-read fn
+c:,/""\c
+d:-36+"b"$d
+d:d-(26*d=28)+(11*d=12)+(10*d=10) / mark -1 blocks, 1 stones, 2 robot
 w:#*d /width
+
+
 m:2*d=2
 b:d-m / the base to work with
-e:b=-1 /edge mask
+e:b=-1 / edge mask; all the fixed blocks
 
 ec:{#&1=,/x &e} / check if there is a 1 on edge - moved off
 /say tm:w#'(«m) / shift up (^)
@@ -27,11 +32,21 @@ say b+(»'s)-s / shift the stone right.
 
 
 s:{w#'(((""\"<^>v")!(«';«;»';»))x)y}
+ms:{[x;y;cm] / function for moving stones when needed
+             / if unable to move/compress (running into edge), return y, the previos pattern
+r:2*x=3
+m:x=3
+tx:x-3*x=3
+r+tx+s[cm;m] / move stone one step further
+/ if I now still have a "2", need to recurse - but state is different so recursion doesn work really
+}
 say "start", d
-say "end", d{[x;y] / say "x: $x"; 
+say "end", d{[x;cm] / say "x: $x"; 
   m:2*x=2; 
   b:x-m; 
   / say "b: $b", s[y;m];
-  tx:s[y;m]+b;
-  ?[(#&,/tx=2);tx;x]
-}/(""\"^^>>>vv<")
+  tx:s[cm;m]+b;
+  ?[(#&,/tx=3);ms[tx;x;cm];(#&,/tx=2);tx;x]
+}/c
+
+
