@@ -1,0 +1,2 @@
+zip:{,/x,'y} / zip each of x with each of y; lengths must match
+gr:{x#'(y#0)} / grid of zeros, height x times width y. 

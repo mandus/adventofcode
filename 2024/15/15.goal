@@ -27,3 +27,9 @@ res:d{[x;cm]
 }/c
 /pr res
 say "p1:", +/,/(100*!h)+'&res=1
+
+zip:{,/x,'y} / zip each of x with each of y; lengths must match
+gr:{x#'(y#0)} / grid of zeros, height x times width y. 
+(ee;bb;ss):{{zip[x;x]}'x}'(e;b;s)
+zr:gr[h;w] / grid of zeros
+rr:{zip[r[x];zr[x]]}'!h
