@@ -3,7 +3,7 @@ fn:"input.txt"
 (2=#ARGS) and fn:ARGS@1
 (d;c):='"\n\n"\-read fn
 c:,/""\c
-(e;b;r;s):(35;46;64;79)=`"b"$d / (#=35, .=46, @=64, O=79)
+(e;r;s):(35;64;79)=`"b"$d / (#=35, .=46 (ignored), @=64, O=79)
 (h;w):(#e;#*e) / height, width
 
 ec:{#&-2=,/x &e} / check if there is a -2 at one of the blocks; stone moved to edge
@@ -16,6 +16,8 @@ ec:{#&-2=,/x &e} / check if there is a -2 at one of the blocks; stone moved to e
 pr:{say "\n"/"c"$(46*0=x)+(64*2=x)+(79*1=x)+(35*-3=x)}
 sh:{w#'(((""\"<^>v")!(«';«;»';»))x)y} / shifts
 ms:{[og;cm;b;r;m] / function for moving stones when needed
+                  / og is orig; cm is command; b is "base" (edges and stones); r is robot location
+                  / m is next pos for moving stone
  bm:b+m;
  ?[#&,/bm=2;:o[og;cm;b;r;sh[cm;m]];(ec bm);:og;b+r+m]}
 
@@ -29,7 +31,13 @@ res:d{[x;cm]
 say "p1:", +/,/(100*!h)+'&res=1
 
 zip:{,/x,'y} / zip each of x with each of y; lengths must match
+tz:{({zip[x[z];y[z]]}[x;y])!'(#x)} / zip two matrix with same number of rows
 gr:{x#'(y#0)} / grid of zeros, height x times width y. 
-(ee;bb;ss):{{zip[x;x]}'x}'(e;b;s)
+pr2:{say "\n"/"c"$(46*0=x)+(64*2=x)+(93*4=x)+(91*3=x)+(35*-3=x)}
+gtr:{[rb;l;r;e](2*rb)+(3*l)+(4*r)-(3*e)} / gather
+spl:{(2;3;4;-3)=`x}                      / split
+(ee;ss):{{zip[x;x]}'x}'(e;s)
 zr:gr[h;w] / grid of zeros
-rr:{zip[r[x];zr[x]]}'!h
+rr:tz[r;zr]
+ls:tz[s;zr]
+rs:tz[zr;s]
