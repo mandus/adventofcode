@@ -6,7 +6,7 @@ c:,/""\c
 (e;r;s):(35;64;79)=`"b"$d / (#=35, .=46 (ignored), @=64, O=79)
 (h;w):(#e;#*e) / height, width
 
-ec:{#&-2=,/x &e} / check if there is a -2 at one of the blocks; stone moved to edge
+ec:{#&-2=,/x} / check if there is a -2 at one of the blocks; stone moved to edge
 
 /tm:w#'(«m) / shift up (^)
 /tm:w#'(»m) / shift down (v)
@@ -14,20 +14,18 @@ ec:{#&-2=,/x &e} / check if there is a -2 at one of the blocks; stone moved to e
 /tm:w#'(«'m) / shift left (<)
 
 pr:{say "\n"/"c"$(46*0=x)+(64*2=x)+(79*1=x)+(35*-3=x)}
-sh:{w#'(((""\"<^>v")!(«';«;»';»))x)y} / shifts
+sh:{[w;d;m]w#'(((""\"<^>v")!(«';«;»';»))d)m} / shifts
 ms:{[og;cm;b;r;m] / function for moving stones when needed
                   / og is orig; cm is command; b is "base" (edges and stones); r is robot location
                   / m is next pos for moving stone
  bm:b+m;
- ?[#&,/bm=2;:o[og;cm;b;r;sh[cm;m]];(ec bm);:og;b+r+m]}
+ ?[#&,/bm=2;:o[og;cm;b;r;sh[w;cm;m]];(ec bm);:og;b+r+m]}
 
 d:(2*r)+s-(3*e) / use 2 for robot, and -3 for edge
-/pr d
 res:d{[x;cm] 
-  r:2*x=2; b:x-r; r:sh[cm;r]; tx:r+b;
-  ?[(#&,/tx=3);:ms[x;cm;tx-3*tx=3;r;sh[cm;r=2]];(#&,/tx=2);tx;x]
+  r:2*x=2; b:x-r; r:sh[w;cm;r]; tx:r+b;
+  ?[(#&,/tx=3);:ms[x;cm;tx-3*tx=3;r;sh[w;cm;r=2]];(#&,/tx=2);tx;x]
 }/c
-/pr res
 say "p1:", +/,/(100*!h)+'&res=1
 
 zip:{,/x,'y} / zip each of x with each of y; lengths must match
@@ -36,8 +34,29 @@ gr:{x#'(y#0)} / grid of zeros, height x times width y.
 pr2:{say "\n"/"c"$(46*0=x)+(64*2=x)+(93*4=x)+(91*3=x)+(35*-3=x)}
 gtr:{[rb;l;r;e](2*rb)+(3*l)+(4*r)-(3*e)} / gather
 spl:{(2;3;4;-3)=`x}                      / split
-(ee;ss):{{zip[x;x]}'x}'(e;s)
+ee:{{zip[x;x]}'x}e
 zr:gr[h;w] / grid of zeros
 rr:tz[r;zr]
 ls:tz[s;zr]
 rs:tz[zr;s]
+d:gtr[rr;ls;rs;ee]
+w*:2 / double the width for part 2
+ma:{[cm;m;l;r](tml;tmr):m*´(l;r);?[(cm¿"^v");(~~(tml+sh[w;"<";tmr]);~~(tmr+sh[w;">";tml]));(tml;tmr)]}
+ms2:{[og;cm;r;e;m;sl;sr;ssl;ssr;asl;asr]
+  and[(ec[og+m]);:og]
+  (tml;tmr):ma[cm;m;sl;sr]
+  tm:+/(tml;tmr)
+  ?[(~0~+/,//tm);:o[og;cm;r;e;sh[w;cm;tm];sl;sr;ssl+tml;ssr+tmr;asl+sh[w;cm;tml];asr+sh[w;cm;tmr]];:gtr[r;asl+sl-ssl;asr+sr-ssr;e]]}
+
+res:d{[x;cm]
+  say "\033[2J"
+  pr2[x]
+  say cm
+  (r;sl;sr;e):spl x
+  m:sh[w;cm;r];
+  and[(ec[m+x]);:x] 
+  (tml;tmr):ma[cm;m;sl;sr]
+  tm:+/(tml;tmr)
+  ?[(0~+/,//tm);:(2*m)+x-(2*r);:ms2[x;cm;m;e;sh[w;cm;tm];sl;sr;tml;tmr;sh[w;cm;tml];sh[w;cm;tmr]]]}/c
+pr2 res
+say "p2:", +/,/(100*!h)+'&res=3
