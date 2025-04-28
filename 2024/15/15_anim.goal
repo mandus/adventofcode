@@ -37,10 +37,8 @@ gtr:{[rb;l;r;e](2*rb)+(3*l)+(4*r)-(3*e)} / gather
 spl:{(2;3;4;-3)=`x}                      / split
 zr:gr[h;w] / grid of zeros
 rr:mz[r;zr]; ls:mz[s;zr]; rs:mz[zr;s]; ee:mz[e;e] 
-
 d:gtr[rr;ls;rs;ee]
 w*:2 / double the width for part 2
-
 / push and check if we hit stones; we use ~~ becase we just want 0/1 (to avoid adding up when both right and left match pushing up/down)
 ma:{[cm;m;l;r](tml;tmr):m*´(l;r);?[(cm¿"^v");(~~(tml+sh[w;"<";tmr]);~~(tmr+sh[w;">";tml]));(tml;tmr)]}
 ms2:{[og;cm;r;e;m;sl;sr;cl;cr] / ssl;ssr;asl;asr]
@@ -49,11 +47,18 @@ ms2:{[og;cm;r;e;m;sl;sr;cl;cr] / ssl;ssr;asl;asr]
   tm:+/(tl;tr)
   ?[(~0~+/,//tm);:o[og;cm;r;e;sh[w;cm;tm];sl;sr;sh[w;cm;tl]+cl-tl;sh[w;cm;tr]+cr-tr];:gtr[r;cl+sl;cr+sr;e]]}
 
+print run "clear"
 res:d{[x;cm]
+  say"\033[2J"
+  pr2[x]
+  say cm
+  run"sleep""0.05"
   (r;sl;sr;e):spl x
   m:sh[w;cm;r];
   and[(ec[m+x]);:x] 
   (tl;tr):ma[cm;m;sl;sr]
   tm:+/(tl;tr)
   ?[(0~+/,//tm);:(2*m)+x-(2*r);:ms2[x;cm;m;e;sh[w;cm;tm];sl;sr;sh[w;cm;tl]-tl;sh[w;cm;tr]-tr]]}/c
+say "\033[2J"
+pr2 res
 say "p2:", +/,/(100*!h)+'&res=3
