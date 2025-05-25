@@ -29,7 +29,7 @@ res:d{[x;cm]
 say "p1:", +/,/(100*!h)+'&res=1
 
 zip:{,/x,'y} / zip each of x with each of y; lengths must match
-mz:{({zip[x[z];y[z]]}[x;y])'!(#x)} / zip two matrix with same number of rows
+mz:{(#x)$zip[,/x;,/y]} / zip two matrix with same number of rows
 gr:{x#'(y#0)} / grid of zeros, height x times width y. 
 pr2:{say "\n"/"c"$(46*0=x)+(64*2=x)+(93*4=x)+(91*3=x)+(35*-3=x)}
 
