@@ -1,4 +1,5 @@
 zip:{,/x,'y} / zip each of x with each of y; lengths must match
 mzip:{(#x)$zip[,/x;,/y]} / zip two matrix with same number of rows
 mz:{,/'+'+(x;y)} / more idiomatic row-wise zip, suggested from ngn
+/ mz:{(#x)$,/+,/'(x;y)} / maybe faster, but need the reshape
 gr:{x#'(y#0)} / grid of zeros, height x times width y. 

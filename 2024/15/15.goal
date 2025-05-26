@@ -28,8 +28,11 @@ res:d{[x;cm]
 }/c
 say "p1:", +/,/(100*!h)+'&res=1
 
-zip:{,/x,'y} / zip each of x with each of y; lengths must match
-mz:{(#x)$zip[,/x;,/y]} / zip two matrix with same number of rows
+/ zip:{,/x,'y} / zip each of x with each of y; lengths must match
+/ mz:{(#x)$zip[,/x;,/y]} / zip two matrix with same number of rows
+/ mz:{,/'+'+(x;y)} / more idiomatic row-wise zip, suggested from ngn
+/ mz:{,/'(#x)$,/x,''y} / another version...
+mz:{(#x)$,/+,/'(x;y)} / and another version.. join x;y, flatten over each, transpose and flatten again - then take right shape
 gr:{x#'(y#0)} / grid of zeros, height x times width y. 
 pr2:{say "\n"/"c"$(46*0=x)+(64*2=x)+(93*4=x)+(91*3=x)+(35*-3=x)}
 
