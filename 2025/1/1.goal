@@ -1,0 +1,17 @@
+#!/usr/bin/env goal
+fn:"input.txt"
+(2=#ARGS) and fn:ARGS@1
+d:(0 1_)'=-read fn
+
+n:*/'+((("L""R"!-1 1)@*+d);("i"$*|+d)) 
+
+hz:+/~100!+\50,n / a bit cleaner, no extra func; hit zero!
+say "part 1: %d"$hz
+
+r:(50,0){[x;y] (p;z):x
+  z+:-100!abs(y)
+  c:(100!abs y)*sign y
+  np:p+c 
+  z+:?[((np<1)and(p>0))or(np>99);1;0]
+(100!np;z)}/n
+say "part 2: %d"$*|r
