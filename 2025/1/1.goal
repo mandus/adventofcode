@@ -5,7 +5,7 @@ d:(0 1_)'=-read fn
 
 n:*/'+((("L""R"!-1 1)@*+d);("i"$*|+d)) 
 
-hz:+/~100!+\50,n / a bit cleaner, no extra func; hit zero!
+hz:+/~100!50+\n / a bit cleaner, no extra func; hit zero!
 say "part 1: %d"$hz
 
 r:(50,0){[x;y] (p;z):x
@@ -15,3 +15,8 @@ r:(50,0){[x;y] (p;z):x
   z+:?[((np<1)and(p>0))or(np>99);1;0]
 (100!np;z)}/n
 say "part 2: %d"$*|r
+
+
+/ inspired from discodoug's ngn/k solution
+(d;l):(:;"i"$)@'+(0 1_)'=-read fn
+say "part 1: %d"$+/~100!50+\l*s:1 -1@"L"=d
