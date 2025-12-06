@@ -1,3 +1,10 @@
 #!/usr/bin/env goal
 fn:?[2>#ARGS;"input.txt";ARGS 1]
-\"v"$'"-"\'","\-read fn
+d:"v"$'"-"\'","\-read fn
+invid:{?[~2!tl:&:ts:$x;(=/(0;tl%2)_ts) and x;0]}
+rg:{(*x)+!1+-/|x}
+say "p1: %v"$+/,/{invid'x}'rg'd
+
+cp:{[s;p] and[(t="i"$t:(&ts:$s)%p);?[1=#?(t*!p)_ts;s;0]]}
+chk:{?(cp x)'(1_1+!&$x)}
+say "p2: %v"$+/,//{?chk'x}'rg'd
