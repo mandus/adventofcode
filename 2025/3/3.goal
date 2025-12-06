@@ -1,4 +1,4 @@
 #!/usr/bin/env goal
 fn:?[2>#ARGS;"input.txt";ARGS 1]
-\d:=-read fn
+d:=-read fn
 say "part 1: %v"$+/"i"$""/{(l@(f:*>-1_l:""\x);nl@*>nl:(1+f)_l)}'d
