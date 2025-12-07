@@ -1,0 +1,19 @@
+#!/usr/bin/env goal
+fn:?[2>#ARGS;"input.txt";ARGS 1]
+
+gr:{x#'(y#0)} / grid of zeros, height x times width y. 
+
+m:~"@"?""\=-read fn
+h:#m / height, for converting 1d <-> 2d
+w:#*m / width, for filling out
+
+l:«'
+r:»'
+d:{w#'»x}
+u:{w#'«x}
+
+adj:{[m] +/(lm:l m;rm:r m;u m;d m;d lm;u lm;d rm;u rm)} / shift around and count
+say "part 1: %v"$+/4>(,//adj m)@(&,//m)
+
+rem:{[m;c] opts:&4>(,//adj m); cnt:#r:opts@&(opts¿&fm:,//m); ?[cnt>0;:o[(w*!h)_@[fm;r;:;0];c+cnt];c]}
+say "part 2: %v"$rem[m;0]
