@@ -1,0 +1,20 @@
+#!/usr/bin/env goal
+fn:?[2>#ARGS;"input.txt";ARGS 1]
+
+(f;a):"\n\n"\-read fn
+f:+"v"$"-"\=f
+a:"v"$=a
+
+(s;e):(-1+*f;1+*|f)
+tst:{?[(x>)^e@&(x>)s;1;0]}
+say "part 1: %v"$+/tst'a
+
+rs:(+(s;*|f))@<s
+cnt:{[l;r]
+ and[~#l;:r] / return result r if l is empty
+ n:*l; p:*|r / next and previous
+ cl:1_l
+ ?[*n>pe:*|p;:o[cl;(r,+n)];(ne:*|n)>pe;:o[cl;(r,+(pe;ne))];:o[cl;r]]
+}[1_rs;,*rs]
+
+say "part 2: %v"$+/(-/)'|'cnt
