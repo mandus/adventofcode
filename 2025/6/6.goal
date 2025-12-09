@@ -1,0 +1,11 @@
+#!/usr/bin/env goal
+fn:?[2>#ARGS;"input.txt";ARGS 1]
+
+n:+"v"$-1_f:=-read fn
+op:op@&" "?op:""\*|f
+ops:"*""+"!(*;+)
+say "part 1: %v"$+/{ops[x]/y}'[op;n]
+
+d:-'""/'+""\-1_f / need to flip around before merge to get the "vertical" nums
+n:"v"${x=""}^'(0,&{x=""}d)_d / cut on the empty values and then filter them out
+say "part 2: %v"$+/{ops[x]/y}'[op;n]
