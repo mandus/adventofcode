@@ -1,0 +1,39 @@
+#!/usr/bin/env goal
+fn:?[2>#ARGS;"input.txt";ARGS 1]
+(s;i):("^";"S")=`""\=-read fn
+i:*i
+cnt:0
+i{cnt+:#sp:&2=(x+y); @[@[x;,/(-1;1)+`sp;:;1];sp;:;0]}/s
+say "part 1: %v"$cnt
+
+/ do breath first search to find every paths to every leaf - probably correct, but too heavy
+/ps:*&i
+/i{sp:&2=(x+y)
+/ ps::,/({[sp;p] ?[(l:*|p)¿sp;p,´(-1;1)+l;,p]}sp)'ps
+/ @[@[x;,/(-1;1)+`sp;:;1];sp;:;0]}/s
+/say "part 2: %v"$#ps
+
+
+/ depth first search instead. With memoizing. But then I have to 
+/ construct all the paths upfront:
+g:(,0)!(,0) / graph with a dummy init-entry (removed when graph has been constructed)
+w:#i
+i{[x;y] (ix;y):(*:;1_)@`y; nix:ix+1
+  sp:&2=(c:x+y)
+  n:&(1=x)&(1=c)
+  k:w/'|'(&x),`ix / keys
+  wsp:+(-1,1)+`w/'|'sp,`nix / split points decoded to 1d based on w(idth)
+  wn:w/'|'n,`nix            / regular nodes decoded to 1d based on w(idth)
+  v:?[sp
+      @[@[x;sp;:;wsp];n;:;wn]
+      @[x;n;:;wn]]
+  g+:k!(*'~v)^v
+  @[@[x;,/(-1,1)+`sp;:;1];sp;:;0]}/(!#s),'s
+g:(,0)^g / filter out the dummy init-entry
+/ part 1 is now just counting all nodes with two neighbours in the graph
+say "part 1 (graph) %v"$#&2=#'.g
+
+/ traverse graph
+/ start at first node:
+vs:(,0)!(,0) / visited nodes; again with dummy init (just leave it)
+say "part 2: %v"${and[c:vs x;:c]; vs[x]:e:?[n:g x;+/o'n;1]; e}[*!g]
