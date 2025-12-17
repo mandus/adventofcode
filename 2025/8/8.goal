@@ -1,0 +1,40 @@
+#!/usr/bin/env goal
+fn:?[2>#ARGS;"input.txt";ARGS 1]
+cnt:?[2>#ARGS;1000;10]
+d:"v"$","\=-read fn
+
+w:#d / for encoding values
+dst:{+/*/2#,x-y}
+n:d dst`´ d / distances between all nodes
+lz:-1+(#n)*#n / index of last of the zeros (the lower triangle) when flattend
+on:<,/n*(!#n)<`(!#n) / upper diagonal; sorted
+oidx:(1+on?lz)_on / ordered index, cut the zeros
+
+ps:{-2#0,w\x;}'(cnt#oidx)  / I can group just based on the index in d - no need to look at the actual nodes or distances. So just gather based on the p
+pr:(,-1)!(,-1) / create a map for parent-mapping; a dummy -1 that may be removed at the end
+gr:(,-1)!(,-1) / ditto for the groups
+
+/ helper - check if k is a key in the map
+im:{[m;k] ((!m)?k)<(#m)} 
+
+fpr:{?[and[im[pr;x];[r:pr x;1];~r~x];:and[pr[x]:r:o[r];r];:and[pr[x]:x;x]]}
+
+/ find parents for all in the set
+{(a;b):x; (ra;rb):fpr'x; and[~ra~rb;pr[rb]:ra];}'ps
+/ group the nodes; sets of distinct values
+{(a;b):x; ra:fpr[a]; ?[im[gr;ra];gr[ra],:x;gr[ra]:x]; gr[ra]:?gr[ra]}'ps
+say "part 1: %v"$*/3#sz@>sz:#'.gr
+
+/ rest of the pairs - brute force
+/ pe:{-2#0,w\x}'(cnt_oidx)
+/ l:ps
+/ {fprs y; l,:+y; gr::(,-1)!(,-1); grs'l; mxgr:*sz@>sz:#'.gr
+/   mxgr<#d;}/[0<;1;pe]
+/ say "part 2: %v"$*/*'d@*|l
+
+/ No need to build the graph - I just need all the nodes to be on either side of a connection;
+/ so find the point in the ordered set where the distinct list of both sides covers all nodes
+rp:{-2#0,w\x}'(cnt_oidx) / map rest of the pairs 
+l:ps / start with the same as part 1
+{l,:+y; mxd:#?,/(*:;*|:)@`+l; mxd<#d}/[0<;1;rp]
+say "part 2: %v"$*/*'d@*|l
