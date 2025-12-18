@@ -1,0 +1,3 @@
+#!/usr/bin/env goal
+fn:?[2<#ARGS;"input.txt";ARGS 1]
+\"v"$","\=-read fn
