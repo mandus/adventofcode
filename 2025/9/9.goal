@@ -1,3 +1,7 @@
 #!/usr/bin/env goal
-fn:?[2<#ARGS;"input.txt";ARGS 1]
-\"v"$","\=-read fn
+fn:?[2>#ARGS;"input.txt";ARGS 1]
+d:"v"$","\=-read fn
+w:#d
+
+ar:{*/1+abs'x-y}
+say "part 1: %v"$*a@>a:,/(d ar`´ d)*(!w)<`(!w)
