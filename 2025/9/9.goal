@@ -4,4 +4,39 @@ d:"v"$","\=-read fn
 w:#d
 
 ar:{*/1+abs'x-y}
-say "part 1: %v"$*a@>a:,/(d ar`´ d)*(!w)<`(!w)
+say "part 1: %v"$*a@oa:>a:,/(d ar`´ d)*(!w)<`(!w)
+
+ray:{(xp;yp;xl;yl;xr;yr):,/(x;y;z); (mi;ma):(&/;|/)@`(yl;yr)
+  ?[yl=yr
+    0 / ignore horizontal lines (now we know xl=xr in our data)
+    ?[xp>xr
+      0 / point is right of the line
+      ((ma+1)>yp)&yp>mi]]}
+     
+onedge:{(xp;yp):x; (mix;max;miy;may):,/(&/;|/)@`´+(y;z)
+ or[(mix=max)&(xp=max)&((may+1)>yp)&(yp+1)>miy;(miy=may)&(yp=may)&((max+1)>xp)&(xp+1)>mix]}
+on:{[p;lp] |/(onedge p)'[-1_lp;1_lp]} / check if point is on and edge in the boundary
+ins:{[p;lp] 2!+/(ray p)'[-1_lp;1_lp]} / check if point is inside the boundary
+
+dw:d,(,*d) / wrap around d to form the full loop! - I can now do on[p; dw], etc
+
+/ Strategy, start with the rectangles found in part 1 - and for decreasing sizes check if they are fully inside the area
+/ A rectangle is fully inside if all 4 corners are on the edge or inside, and if no edge intersects with the interior 
+/ of the rectangle
+/ This is very slow - there must be a shortcut somewhere...
+
+r:d@w\*oa
+crs:{x,+(,*+x),,|*|+x} / need to flip and rotate to get the correct 4 corners
+
+/ if all corners are on or inside, check if any edge intersects with the interior
+is:{[r;el;er] 
+ (rix;rax;riy;ray):,/(&/;|/)@`´+r
+ (eix;eax;eiy;eay):,/(&/;|/)@`´+(el;er)
+ ?[eix=eax;(eix>rix)&(eax<rax)&(eiy<ray)&(eay>riy);(eiy>riy)&(eay<ray)&(eix<rax)&(eax>rix)]}
+intsect:{[r;lp] |/(is r)'[-1_lp;1_lp]}
+
+rs:d@{-2#0,w\x}'oa / all the rectangles in part 1
+res:*rs / will be used to store the result - quick and dirty..
+({[lp;acc;r] res::r; c: crs r
+  ?[&/((on'c)@`lp)|(ins'c)@`lp;~intsect[r;lp];0]} dw)/[1>;0;rs] / fold while; store the rectangle we test in res and return if valid (~intsect == 1)
+say "part 2: %v"$ar[*res;*|res]
