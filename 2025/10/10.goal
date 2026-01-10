@@ -1,3 +1,13 @@
 #!/usr/bin/env goal
 fn:?[2>#ARGS;"input.txt";ARGS 1]
-\d:""\'=-read fn
+\d:" "\'=-read fn
+\l:0 1_´-1_'d
+\(x;y):*l
+\t:"#"=""\-1_1_*x  / target lights
+w:#t / width of lights
+\b:{@[w#0;x;:;1]}',/'"v"$'y / buttons
+\n:#b / num buttons
+\c:!n#2 / all combinations
+
+/ 2!+/'+1 0 1 0 1 0 * b -> gives a variant. Must do this for all in c, find those matching the target, and then which one has fewest buttonpresses
+
