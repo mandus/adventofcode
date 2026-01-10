@@ -1,13 +1,19 @@
 #!/usr/bin/env goal
 fn:?[2>#ARGS;"input.txt";ARGS 1]
-\d:" "\'=-read fn
-\l:0 1_´-1_'d
-\(x;y):*l
-\t:"#"=""\-1_1_*x  / target lights
-w:#t / width of lights
-\b:{@[w#0;x;:;1]}',/'"v"$'y / buttons
-\n:#b / num buttons
-\c:!n#2 / all combinations
+d:" "\'=-read fn
+l:0 1_´-1_'d
 
-/ 2!+/'+1 0 1 0 1 0 * b -> gives a variant. Must do this for all in c, find those matching the target, and then which one has fewest buttonpresses
+f:{(t;b):x
+   t:"#"=""\-1_1_*t / target
+   b:({@[x#0;y;:;1]}(#t))',/'"v"$'b / map buttons
+   c:+!(#b)#2 / all combinations - pressing a button twice is back to start, so no need to check more than on and off in all permutations
+   *^+/'c@&t~´2!'+/''+'c*`b} / multiply; mod 2 and match target - count num buttons, sort and return first (lowest)
+say "part 1: %v"$+/f'l
 
+\j:,/'"v"$'-1_'1_'(|'d)@`0 / target joltage
+/b:*'|'l / buttons
+\b:{w:1+|/,//x; ({@[x#0;y;:;1]}w)'x}',/''"v"$'*'|'l / map buttons to joltage jumps
+/ l:1_'d / alternative 
+/ From here it should almost be linear algebra since now 
+/ it's regular math - but I have a possibly linear dependent basis 
+/ and need to find the smallest integer solution.
